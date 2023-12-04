@@ -1,0 +1,10 @@
+.review-table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ccc;
+}
+
+.review-table td {
+    padding: 8px;
+    border: 1px solid #ccc;
+}
