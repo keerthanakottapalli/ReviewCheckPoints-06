@@ -160,14 +160,15 @@ export default function EmployeeReviews() {
                 </div>
             </div>
             <Modal open={previewModalOpen} onClose={handlePreviewModalClose}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                    <Card>
-                        <CardContent>
-                            <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-                        </CardContent>
-                    </Card>
-                </div>
-            </Modal>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                        <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor:'#e9ecef' }}>
+                        <Button style={{ textAlign: 'left', fontSize:'26px', justifyContent:'end', color:'black' }} onClick={handlePreviewModalClose}>X</Button>
+                            <CardContent>
+                                <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Modal>
         </div>
     );
 }

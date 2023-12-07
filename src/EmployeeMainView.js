@@ -63,9 +63,9 @@ const ButtonCenter = () => {
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-//   const handleChangePassword = () => {
-//     setShowChangePassword(true);
-//   };
+  //   const handleChangePassword = () => {
+  //     setShowChangePassword(true);
+  //   };
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
@@ -77,7 +77,7 @@ const ButtonCenter = () => {
     const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
     try {
       // Fetch the user data based on empid
-      const response = await fetch(`${BASE_URL}/GetKPI/${empid}`);
+      const response = await fetch(`${BASE_URL}/api/emp_data/${empid}`);
       const userData = await response.json();
 
       if (userData.message.length > 0) {
@@ -102,7 +102,7 @@ const ButtonCenter = () => {
   const fetchUserProfile = async () => {
     try {
       const empid = localStorage.getItem('Empid');
-      const response = await fetch(`${BASE_URL}/GetKPI?Empid=${empid}`);
+      const response = await fetch(`${BASE_URL}/api/emp_data?Empid=${empid}`);
       const data = await response.json();
 
       // Filter the data to find the user with the matching Empid
@@ -134,9 +134,10 @@ const ButtonCenter = () => {
       // Fetch the data from the endpoint
       const response = await fetch(`http://172.17.15.253:8080/getcheckpoints`);
       const data = await response.json();
+      console.log(data,"data137")
 
       // Check if empid from localStorage matches any of the Empid in the fetched data
-      const isEmpidExists = data.employees.some((employee) => employee.Empid === parseInt(empid));
+      const isEmpidExists = data.employee.some((employee) => employee.Empid === parseInt(empid));
 
       if (!isEmpidExists) {
         // If empid exists, navigate to the form
@@ -154,7 +155,7 @@ const ButtonCenter = () => {
     // Fetch the registration data from the server when the component mounts
     const fetchRegistrations = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/GetKPI`); // Replace with the correct URL for your backend
+        const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
         if (!response.ok) {
           throw new Error('Network response was not ok.');
         }
@@ -183,7 +184,7 @@ const ButtonCenter = () => {
       formData.append('Image', file); // Use the key 'Image'
 
       try {
-        const response = await fetch(`${BASE_URL}/UpdateImage/${firstname}/${lastname}`, {
+        const response = await fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
           method: 'POST',
           body: formData,
         });
@@ -242,11 +243,11 @@ const ButtonCenter = () => {
                     <td>
                       {registration.Image && (
                         <img
-                          src={`${BASE_URL}/uploads/${registration.Image}`}
+                          src={registration.Image}
                           alt="Profile"
                           style={{
-                            width: '60px', // Set the desired width
-                            height: '60px', // Set the desired height
+                            width: '60px',
+                            height: '60px',
                             borderRadius: '50%',
                             marginRight: '8px',
                           }}
@@ -279,7 +280,7 @@ const ButtonCenter = () => {
                 </ListItemIcon>
                 Profile
               </MenuItem>
-             <MenuItem key="ProfileChange">
+              <MenuItem key="ProfileChange">
                 <label htmlFor="imageUpload">
                   <ListItemIcon>
                     <CameraAltIcon fontSize="small" /> {/* Add the CameraAltIcon */}
@@ -320,67 +321,67 @@ const ButtonCenter = () => {
           <CloseIcon style={{ color: 'red', width: '10%', height: '40%' }} />
         </IconButton>
       )
-   
 
-   
 
-       : (
-        <div style={{ display: 'flex', alignItems: 'center',  textAlign:'center' }}>
-        <div className="button-center-container" style={{ flex: 1 }}>
-          <div className='Paragraph-division'>
-          <p className=" main-Heading" style={{ color: '#0d4166', marginBottom:'-10px' }}>Fill Form and View Submitted Details.</p>
-          <p  className='sub-Heading' style={{ marginBottom:'-10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
-          <p  className='sub-Heading' style={{ marginBottom:'30px'}}>Click the view details button to review the previously submitted details.</p>
-          
-          </div>
-          <div style={{textAlign:'center'}}>
-          <Button style={{ backgroundColor: isHovering ? '#db764f' : '#d95623'}}
-            className="kpi-form"
-            variant="contained"
-            onClick={handleFillFormClick}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            Fill Form
-          </Button>
-          <Button style={{ backgroundColor: isHovering1 ? '#db764f' : '#d95623', marginLeft: '20px' }} className="view-details" variant="contained"
-            onClick={handleViewDetailsClick}
-            onMouseEnter={handleMouseEnter1}
-            onMouseLeave={handleMouseLeave1}>
-            View Details
-          </Button>
-          </div>
-          <Dialog open={openDialog} onClose={() => setOpenDialog(false)} >
-            <DialogContent style={{ width: '420px' }}>
+
+
+        : (
+          <div style={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+            <div className="button-center-container" style={{ flex: 1 }}>
+              <div className='Paragraph-division'>
+                <p className=" main-Heading" style={{ color: '#0d4166', marginBottom: '-10px' }}>Fill Form and View Submitted Details.</p>
+                <p className='sub-Heading' style={{ marginBottom: '-10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
+                <p className='sub-Heading' style={{ marginBottom: '30px' }}>Click the view details button to review the previously submitted details.</p>
+
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <Button style={{ backgroundColor: isHovering ? '#db764f' : '#d95623' }}
+                  className="kpi-form"
+                  variant="contained"
+                  onClick={handleFillFormClick}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  Fill Form
+                </Button>
+                <Button style={{ backgroundColor: isHovering1 ? '#db764f' : '#d95623', marginLeft: '20px' }} className="view-details" variant="contained"
+                  onClick={handleViewDetailsClick}
+                  onMouseEnter={handleMouseEnter1}
+                  onMouseLeave={handleMouseLeave1}>
+                  View Details
+                </Button>
+              </div>
+              <Dialog open={openDialog} onClose={() => setOpenDialog(false)} >
+                <DialogContent style={{ width: '420px' }}>
+                  <img
+                    src="https://badge-exam.miraclesoft.com/assets/ecert/Completed-test.svg"
+                    alt="Your Image Alt Text"
+                    style={{ maxWidth: '100%', maxHeight: '200px', marginLeft: '23%' }}
+                  />
+                  <DialogContentText style={{ fontSize: '18px', marginLeft: '10%', fontWeight: 'bold', color: 'red' }}>
+                    You have already submitted the form.
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setOpenDialog(false)} color="primary">
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </div>
+
+            <div style={{ flex: 1 }}>
               <img
-                src="https://badge-exam.miraclesoft.com/assets/ecert/Completed-test.svg"
+                src="https://media.istockphoto.com/id/1433847746/vector/employer-meeting-job-applicant-at-pre-employment-assessment-employee-evaluation-assessment.jpg?s=612x612&w=0&k=20&c=ZXFX_KT_Z_0gM1kOm7qu9bpjL69TjqWX24zdrplhsBY="
                 alt="Your Image Alt Text"
-                style={{ maxWidth: '100%', maxHeight: '200px', marginLeft: '23%' }}
+                style={{ height: '50%', width: '100%' }}
               />
-              <DialogContentText style={{ fontSize: '18px', marginLeft: '10%', fontWeight: 'bold', color: 'red' }}>
-                You have already submitted the form.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenDialog(false)} color="primary">
-                OK
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      
-        <div style={{ flex: 1 }}>
-          <img
-            src="https://media.istockphoto.com/id/1433847746/vector/employer-meeting-job-applicant-at-pre-employment-assessment-employee-evaluation-assessment.jpg?s=612x612&w=0&k=20&c=ZXFX_KT_Z_0gM1kOm7qu9bpjL69TjqWX24zdrplhsBY="
-            alt="Your Image Alt Text"
-            style={{ height: '50%', width: '100%' }}
-          />
-        </div>
-      </div>
-      
+            </div>
+          </div>
 
 
-      )}
+
+        )}
       <Dialog
         open={isProfileCardOpen}
         onClose={handleCloseProfileCard}
@@ -388,29 +389,29 @@ const ButtonCenter = () => {
         maxWidth="sm" // Sets the maximum width of the dialog
       >
         <DialogTitle style={{ marginLeft: '33%', fontSize: '24px', fontWeight: 'bolder' }}>Profile Details</DialogTitle>
-        <DialogContent style={{ height: '370px' }}>
+        <DialogContent style={{ height: '400px' }}>
           {/* Display user profile information */}
           {registrations.map((registration) => (
             registration.Firstname === firstname && (
-              <div style={{ marginLeft: '40%' }} onClick={handleToggleImagePreview}>
+              <div onClick={handleToggleImagePreview}>
                 {registration.Image && (
                   <img
-                    src={`${BASE_URL}/uploads/${registration.Image}`}
+                    src={registration.Image}
                     alt="Profile"
                     style={{
-                      maxWidth: '120px',
-                      borderRadius: '50%',
-                      height: '50%',
-                      cursor: 'pointer', // Add cursor style for pointer
+                      borderRadius: "50%",
+                      cursor: 'pointer',
+                      height: '120px',
+                      width: '120px'
                     }}
                   />
                 )}
               </div>
             )
           ))}<br />
-{userData && (
+          {userData && (
             <>
-              
+
 
               <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '5%' }}>
                 <div style={{ marginRight: '20px' }}>
@@ -443,11 +444,11 @@ const ButtonCenter = () => {
                   <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
                     <span style={{ fontWeight: 'bold', color: 'Black' }}>Location:</span> {userData.Location}
                   </p>
-                
+
                 </div>
               </div>
 
-              
+
             </>
           )}
         </DialogContent>
@@ -457,6 +458,7 @@ const ButtonCenter = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
         <DialogContent>
           {registrations.map((registration) => (
@@ -464,7 +466,7 @@ const ButtonCenter = () => {
               <div>
                 {registration.Image && (
                   <img
-                    src={`${BASE_URL}/uploads/${registration.Image}`}
+                    src={registration.Image}
                     alt="Profile Preview"
                     style={{
                       maxWidth: '100%',
@@ -477,7 +479,6 @@ const ButtonCenter = () => {
           ))}
         </DialogContent>
       </Dialog>
-
     </>
   );
 };

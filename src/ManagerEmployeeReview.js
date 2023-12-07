@@ -14,6 +14,12 @@ import {
     MenuItem
 } from '@mui/material';
 import {
+
+    Card,
+    CardContent,
+    Modal,
+} from '@material-ui/core';
+import {
     AppBar, Toolbar, Typography
 } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
@@ -23,6 +29,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import DownloadIcon from '@mui/icons-material/Download';
+import PreviewIcon from '@mui/icons-material/Preview';
 
 export default function EmployeePortal() {
     const navigate = useNavigate();
@@ -30,6 +38,8 @@ export default function EmployeePortal() {
     const [employeeName, setEmployeeName] = useState(''); // Declare employeeName state
     const [selectedTab, setSelectedTab] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState('');
 
     // Create a state variable to store data for each tab
     const [tabData, setTabData] = useState([]);
@@ -83,6 +93,33 @@ export default function EmployeePortal() {
         // console.log(employeeData, "80");
     }, [employeeData, tabLabels]);
 
+
+
+    const handlePreview = (imageUrl) => {
+        setPreviewImageUrl(imageUrl);
+        setPreviewModalOpen(true);
+    };
+
+    const handlePreviewModalClose = () => {
+        setPreviewModalOpen(false);
+        setPreviewImageUrl('');
+    };
+
+    const handleDownload = async (imageUrl) => {
+        const image = await fetch(imageUrl);
+
+        const nameSplit = imageUrl.split("/");
+        const duplicateName = nameSplit.pop();
+
+        const imageBlog = await image.blob()
+        const imageURL = URL.createObjectURL(imageBlog)
+        const link = document.createElement('a')
+        link.href = imageURL;
+        link.download = "" + duplicateName + "";
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    };
 
 
     const handleReviewverChange = (tabIndex, dataIndex, value) => {
@@ -206,7 +243,10 @@ export default function EmployeePortal() {
                                         </TableCell>
                                         <TableCell>
                                             {data.imageUrl && (
-                                                <img src={data.imageUrl} alt="Employee" style={{ maxWidth: '50px', maxHeight: '50px' }} />
+                                                <>
+                                                    <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
+                                                    <DownloadIcon onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
+                                                </>
                                             )}
                                         </TableCell>
                                         <TableCell>
@@ -258,6 +298,16 @@ export default function EmployeePortal() {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Modal open={previewModalOpen} onClose={handlePreviewModalClose}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                        <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor:'#e9ecef' }}>
+                        <Button style={{ textAlign: 'left', fontSize:'26px', justifyContent:'end', color:'black' }} onClick={handlePreviewModalClose}>X</Button>
+                            <CardContent>
+                                <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Modal>
             </form>
         </div>
     );
