@@ -32,6 +32,7 @@ const ManagerPortal = () => {
     const [showImagePreview, setShowImagePreview] = useState(false);
     const [loading, setLoading] = useState(true);
 
+
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
@@ -55,7 +56,7 @@ const ManagerPortal = () => {
         const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
         try {
             // Fetch the user data based on empid
-            const response = await fetch(`${BASE_URL}/GetKPI/${empid}`);
+            const response = await fetch(`${BASE_URL}/api/emp_data/${empid}`);
             const userData = await response.json();
 
             if (userData.message.length > 0) {
@@ -82,7 +83,7 @@ const ManagerPortal = () => {
     const fetchUserProfile = async () => {
         try {
             const empid = localStorage.getItem('Empid');
-            const response = await fetch(`${BASE_URL}/GetKPI?Empid=${empid}`);
+            const response = await fetch(`${BASE_URL}/api/emp_data?Empid=${empid}`);
             const data = await response.json();
 
             // Filter the data to find the user with the matching Empid
@@ -111,42 +112,20 @@ const ManagerPortal = () => {
 
 
     useEffect(() => {
-        // Fetch the registration data from the server when the component mounts
-        const fetchRegistrations = async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/GetKPI`); // Replace with the correct URL for your backend
-                if (!response.ok) {
-                    throw new Error('Network response was not ok.');
-                }
-                const data = await response.json();
-                setRegistrations(data.message);
-
-                // Extract Firstname from the API response
-                const firstnames = data.message.map(item => item.Firstname);
-
-            } catch (error) {
-                console.error('Error:', error.message);
-            }
-        };
-
-        fetchRegistrations();
-    }, []);
-
-    useEffect(() => {
         // Fetch employee details
         fetch(`http://172.17.15.253:8080/getcheckpoints`)
             .then((response) => response.json())
             .then((data) => {
-                const employeesWithPractices = data.employees;
+                const employeesWithPractices = data.employee;
                 localStorage.setItem('practices', JSON.stringify(employeesWithPractices));
 
-                // Set the state with the employee data
+                console.log(data,"employeesWithPractices");
                 setEmployeesData(employeesWithPractices);
             })
             .catch((error) => console.error('Error fetching data:', error));
 
         // Fetch reporting manager details
-        fetch(`${BASE_URL}/GetKPI`)
+        fetch(`${BASE_URL}/api/emp_data`)
             .then((response) => response.json())
             .then((data) => {
                 const reportingData = data.message.reduce((acc, manager) => {
@@ -156,6 +135,27 @@ const ManagerPortal = () => {
                 setReportingManagers(reportingData);
             })
             .catch((error) => console.error('Error fetching reporting managers:', error));
+    }, []);
+
+    useEffect(() => {
+        // Fetch the registration data from the server when the component mounts
+        const fetchRegistrations = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await response.json();
+                setRegistrations(data.message);
+
+                // Extract Firstname from the API response
+                const firstnames = data.message.map((item) => item.Firstname);
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        };
+
+        fetchRegistrations();
     }, []);
 
 
@@ -203,11 +203,11 @@ const ManagerPortal = () => {
                                         <td>
                                             {registration.Image && (
                                                 <img
-                                                    src={`${BASE_URL}/uploads/${registration.Image}`}
+                                                    src={registration.Image}
                                                     alt="Profile"
                                                     style={{
-                                                        width: '60px', 
-                                                        height: '60px', 
+                                                        width: '60px',
+                                                        height: '60px',
                                                         borderRadius: '50%',
                                                         marginRight: '8px',
                                                     }}
@@ -273,18 +273,18 @@ const ManagerPortal = () => {
                         </div>
                     ) : (
                         <TableContainer component={Paper} style={{ marginTop: '120px' }}>
-                            {employeesData.some((employee) => reportingManagers[employee.Empid] === username) ? (
+                            {employeesData && employeesData.length > 0 ? (
                                 <Table style={{ minWidth: 850 }}>
                                     <TableHead style={{ backgroundColor: 'voilet' }}>
                                         <TableRow>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#222', paddingLeft: "10%" }}>Employee ID</TableCell>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: "10%" }}>Employee Name</TableCell>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: "10%" }}>Action</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#222', paddingLeft: '10%' }}>Employee ID</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: '10%' }}>Employee Name</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: '10%' }}>Action</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody style={{ marginLeft: '40%' }}>
                                         {employeesData.map((employee) => {
-                                            const empReportingManager = reportingManagers[employee.Empid] || "";
+                                            const empReportingManager = reportingManagers[employee.Empid] || '';
                                             if (empReportingManager === username) {
                                                 return (
                                                     <TableRow key={employee.Empid} style={{ fontWeight: 'bold', color: '#333', paddingLeft: '10%' }}>
@@ -299,7 +299,8 @@ const ManagerPortal = () => {
                                                                 style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#00aaee' }}
                                                             >
                                                                 Add Employee Comments
-                                                            </Button>&nbsp;&nbsp;&nbsp;
+                                                            </Button>
+                                                            &nbsp;&nbsp;&nbsp;
                                                             <Button
                                                                 variant="contained"
                                                                 color="primary"
@@ -308,7 +309,8 @@ const ManagerPortal = () => {
                                                                 style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#00aaee' }}
                                                             >
                                                                 View Details
-                                                            </Button>&nbsp;&nbsp;&nbsp;
+                                                            </Button>
+                                                            &nbsp;&nbsp;&nbsp;
                                                         </TableCell>
                                                     </TableRow>
                                                 );
@@ -322,11 +324,11 @@ const ManagerPortal = () => {
                                 <Typography
                                     variant="h6"
                                     style={{
-                                        position: "absolute",
-                                        top: "50%",
-                                        left: "50%",
-                                        transform: "translate(-50%, -50%)",
-                                        textAlign: "center",
+                                        position: 'absolute',
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        textAlign: 'center',
                                     }}
                                 >
                                     No Employee Found Here.
@@ -344,20 +346,20 @@ const ManagerPortal = () => {
                     maxWidth="sm" // Sets the maximum width of the dialog
                 >
                     <DialogTitle style={{ marginLeft: '33%', fontSize: '24px', fontWeight: 'bolder' }}>Profile Details</DialogTitle>
-                    <DialogContent style={{ height: '370px' }}>
+                    <DialogContent style={{ height: '400px' }}>
                         {/* Display user profile information */}
                         {registrations.map((registration) => (
                             registration.Firstname === firstname && (
-                                <div style={{ marginLeft: '40%' }} onClick={handleToggleImagePreview}>
+                                <div onClick={handleToggleImagePreview}>
                                     {registration.Image && (
                                         <img
-                                            src={`${BASE_URL}/uploads/${registration.Image}`}
+                                            src={registration.Image}
                                             alt="Profile"
                                             style={{
-                                                maxWidth: '120px',
-                                                borderRadius: '50%',
-                                                height: '50%',
-                                                cursor: 'pointer', // Add cursor style for pointer
+                                                borderRadius: "50%",
+                                                cursor: 'pointer',
+                                                height: '120px',
+                                                width: '120px'
                                             }}
                                         />
                                     )}
@@ -420,7 +422,7 @@ const ManagerPortal = () => {
                                 <div>
                                     {registration.Image && (
                                         <img
-                                            src={`${BASE_URL}/uploads/${registration.Image}`}
+                                            src={registration.Image}
                                             alt="Profile Preview"
                                             style={{
                                                 maxWidth: '100%',

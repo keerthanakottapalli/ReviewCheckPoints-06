@@ -50,10 +50,22 @@ export default function EmployeeReviews() {
         setPreviewImageUrl('');
     };
 
-    const downloadImage = (imageUrl, filename) => {
-        saveAs(imageUrl, filename);
-      };
-  
+    const handleDownload = async (imageUrl) => {
+        const image = await fetch(imageUrl);
+
+        const nameSplit = imageUrl.split("/");
+        const duplicateName = nameSplit.pop();
+
+        const imageBlog = await image.blob()
+        const imageURL = URL.createObjectURL(imageBlog)
+        const link = document.createElement('a')
+        link.href = imageURL;
+        link.download = "" + duplicateName + "";
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    };
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -63,6 +75,7 @@ export default function EmployeeReviews() {
 
                 const response = await axios.get(apiUrl);
                 const data = response.data;
+                console.log(data, "data");
                 setRatings(data.employee.ratings);
                 setEmployeeName(data.employee.Empname);
 
@@ -113,29 +126,36 @@ export default function EmployeeReviews() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {ratings
-                                .filter((data) => data.Value === tabLabels[selectedTab])
-                                .map((data, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{data.Review_Points}</TableCell>
-                                        <TableCell>
-                                            {data.Self_Review === "1" ? (
-                                                <button className="yes-button">Yes</button>
-                                            ) : (
-                                                <button className="no-button">No</button>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {data.imageUrl && (
-                                                <>
-                                                    <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
-                                                    <DownloadIcon onClick={() => downloadImage(data.imageUrl, 'custom_filename.jpg')}></DownloadIcon>
-                                                </>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                            {ratings && ratings.length > 0 ? (
+                                ratings
+                                    .filter((data) => data.Value === tabLabels[selectedTab])
+                                    .map((data, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{data.Review_Points}</TableCell>
+                                            <TableCell>
+                                                {data.Self_Review === "1" ? (
+                                                    <button className="yes-button">Yes</button>
+                                                ) : (
+                                                    <button className="no-button">No</button>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {data.imageUrl && (
+                                                    <>
+                                                        <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
+                                                        <DownloadIcon onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
+                                                    </>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3}>No data available</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
+
                     </Table>
                 </div>
             </div>

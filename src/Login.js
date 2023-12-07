@@ -70,7 +70,7 @@ const LoginForm = () => {
       };
   
      
-      const response = await fetch(`${BASE_URL}/LoginKPI`, {
+      const response = await fetch(`${BASE_URL}/api/emp_login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

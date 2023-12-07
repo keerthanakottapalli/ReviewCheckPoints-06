@@ -3,133 +3,8 @@ import { Table, TableHead, TableRow, TableCell, TableBody, Tab, Tabs, Button, Ch
 import { useParams } from 'react-router-dom';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import axios from 'axios';
-import VisibilitySharpIcon from "@mui/icons-material/VisibilitySharp";
-import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
 import { useNavigate } from 'react-router-dom';
 
-
-const FileDownload = () => {
-    const { Empid } = useParams();
-
-    const [fileUrl, setFileUrl] = useState(null);
-    const [downloadStatus, setDownloadStatus] = useState("");
-
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    console.log(Empid);
-    const handlePreview = () => {
-        axios
-            .get(`http://172.17.15.150:8000/download/${Empid}`, {
-                responseType: "blob",
-            })
-            .then((response) => {
-                // Update the MIME type based on the actual image format
-                const file = new Blob([response.data], { type: "image/jpeg" });
-                const newFileUrl = URL.createObjectURL(file);
-                setFileUrl(newFileUrl);
-                setIsPreviewOpen(true);
-            })
-            .catch(() => {
-                alert("Failed to fetch the file");
-            });
-    };
-
-    const handleClosePreview = () => {
-        setIsPreviewOpen(false);
-        setFileUrl("");
-    };
-
-    const handleDownload = () => {
-        axios
-            .get(`http://172.17.15.150:8000/download/${Empid}`, {
-                responseType: "blob",
-            })
-            .then((response) => {
-                const file = new Blob([response.data], { type: "image/jpeg" });
-                const newFileUrl = URL.createObjectURL(file);
-                setFileUrl(newFileUrl);
-                setIsPreviewOpen(false);
-
-                const link = document.createElement("a");
-                link.href = newFileUrl;
-                link.setAttribute("download", `file_${Empid}.jpg`);
-
-                document.body.appendChild(link);
-                link.click();
-                alert("Image downloaded successfully");
-            })
-            .catch((error) => {
-                console.error("Failed to fetch the image:", error);
-                alert("Image download failed");
-            });
-    };
-    return (
-        <div>
-            <div style={{ position: "relative" }}>
-                <h2 style={{ marginLeft: '20px' }}>Preview & download</h2>
-                <div style={{ marginTop: "20%" }}>
-                    <VisibilitySharpIcon
-                        onClick={handlePreview}
-                        style={{ fontSize: "30px", cursor: "pointer" }}
-                    />
-                    <span style={{ marginLeft: "40px" }}></span>
-                    <DownloadSharpIcon
-                        onClick={handleDownload}
-                        style={{ fontSize: "30px", cursor: "pointer" }}
-                    />
-                </div>
-                {isPreviewOpen && (
-                    <div
-                        style={{
-                            position: "fixed",
-                            top: "40px",
-                            left: 0,
-                            width: "100vw",
-                            height: "100vh",
-                            backgroundColor: "rgba(0, 0, 0, 0.5)",
-                            zIndex: 1,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: "40%",
-                                height: "40%",
-                                backgroundColor: "white",
-                                borderRadius: "8px",
-                                position: "relative",
-                                overflow: "auto",
-                            }}
-                        >
-                            <button
-                                onClick={handleClosePreview}
-                                style={{
-                                    position: "absolute",
-                                    top: "10px",
-                                    right: "10px",
-                                    zIndex: 2,
-                                }}
-                            >
-                                X
-                            </button>
-                            <iframe
-                                src={fileUrl}
-                                style={{
-                                    width: "100%",
-                                    height: "90%",
-                                    border: "none",
-                                }}
-                                title="Preview"
-                            ></iframe>
-                        </div>
-                    </div>
-                )}
-            </div>
-            <p>{downloadStatus}</p>
-        </div>
-    );
-};
 
 export default function EmployeeReviews() {
     const navigate = useNavigate();
@@ -137,6 +12,7 @@ export default function EmployeeReviews() {
     const [employeeName, setEmployeeName] = useState('');
     const [selectedTab, setSelectedTab] = useState(0);
     const [cumulativeFrequencies, setCumulativeFrequencies] = useState([]);
+    const [totalAverage, setTotalAverage] = useState(0); 
     const { Empid } = useParams();
 
     const handleTabChange = (event, newValue) => {
@@ -144,6 +20,7 @@ export default function EmployeeReviews() {
     };
 
     const tabLabels = [...new Set(ratings.map((data) => data.Value))];
+    
 
 
     const handleClose = () => {
@@ -157,7 +34,8 @@ export default function EmployeeReviews() {
         axios
             .get(apiUrl)
             .then((response) => {
-                const data = response.data;
+                console.log(response,"response");
+                const data = response.data.employee;
                 setRatings(data.ratings);
                 const empName = response.data.Empname;
                 setEmployeeName(empName);
@@ -169,25 +47,33 @@ export default function EmployeeReviews() {
 
     useEffect(() => {
         if (ratings.length > 0) {
-            const tabLabels = [...new Set(ratings.map((data) => data.Value))];
+            const uniqueTabLabels = [...new Set(ratings.map((data) => data.Value))];
             const tabAverages = [];
 
-            tabLabels.forEach((label) => {
+            uniqueTabLabels.forEach((label) => {
                 const tabData = ratings.filter((data) => data.Value === label);
-                const totalReviewerData = tabData.reduce((sum, data) => sum + parseInt(data.Reviewver, 10), 0);
-                const average = totalReviewerData / tabData.length;
+                 
 
-                tabAverages.push({
-                    label: label,
-                    average: average,
-                });
+                if (tabData.length > 0) {
+                    const value = tabData.reduce((sum, data) => sum + data.reviewver, 0) ;
+                    const average = value / tabData.length
+
+                    tabAverages.push({
+                        label: label,
+                        average: average,
+                    });
+                }
             });
 
+            const totalAverage =
+                tabAverages.reduce((sum, tabAverage) => sum + tabAverage.average, 0) / tabAverages.length;
+
             setCumulativeFrequencies(tabAverages);
+            setTotalAverage(totalAverage);
         }
     }, [ratings]);
-    const Average = cumulativeFrequencies.reduce((sum, tabAverage) => sum + tabAverage.average, 0);
-    const TotalAverage = Average / cumulativeFrequencies.length;
+    
+    
 
 
     JSON.parse(localStorage.getItem('practices'));
@@ -251,8 +137,8 @@ export default function EmployeeReviews() {
                                                     <Button className="no-button">No</Button>
                                                 )}
                                             </TableCell>
-                                            <TableCell >{data.Reviewver}</TableCell>
-                                            <TableCell>{data.Comments}</TableCell>
+                                            <TableCell >{data.reviewver}</TableCell>
+                                            <TableCell>{data.Manager_Comments}</TableCell>
                                             <TableCell>
                                             {data.Upload && (
                                                 <>
@@ -273,14 +159,15 @@ export default function EmployeeReviews() {
                 </div> */}
             </div>
 
-            {cumulativeFrequencies.map((tabAverage) => (
-                <div key={tabAverage.label}>
-                    <h3>{tabAverage.label} Average Reviewer Data: {tabAverage.average}</h3>
-                    
-                </div>
-                
-            ))}
-            <h3> Total Average Reviewer Data: {TotalAverage}</h3>
+           {cumulativeFrequencies &&
+                cumulativeFrequencies.map((tabAverage) => (
+                    <div key={tabAverage.label}>
+                        <h3>
+                            {tabAverage.label} Average Reviewer Data: {tabAverage.average}
+                        </h3>
+                    </div>
+                ))}
+            <h3>Total Average Reviewer Data: {totalAverage}</h3>
         </div>
     );
 }

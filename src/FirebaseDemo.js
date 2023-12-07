@@ -103,10 +103,26 @@ const FirebaseFileUpload = () => {
       console.error('No file selected');
     }
   };
+//   const handleDownload = async(imageUrl) => {
+//     const image = await fetch(imageUrl);
+
+//     // Split image name
+//     const nameSplit = imageUrl.split("/");
+//     const  duplicateName = nameSplit.pop();
+
+//     const imageBlog = await image.blob()
+//     const imageURL = URL.createObjectURL(imageBlog)
+//     const link = document.createElement('a')
+//     link.href = imageURL;
+//     link.download = "" + duplicateName + "";
+//     document.body.appendChild(link)
+//     link.click()
+//     document.body.removeChild(link)
+// };
 
   const handleDownload = (imageUrl) => {
     // You can use the imageUrl to download the file
-    // For simplicity, let's open the image in a new tab for download
+   
     const downloadWindow = window.open(imageUrl, '_blank');
     if (downloadWindow) {
       downloadWindow.focus();

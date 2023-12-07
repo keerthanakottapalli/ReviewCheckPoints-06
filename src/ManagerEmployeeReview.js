@@ -39,6 +39,7 @@ export default function EmployeePortal() {
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
+    // console.log(employeeData,"42");
 
     const { Empid } = useParams();
 
@@ -54,17 +55,19 @@ export default function EmployeePortal() {
         axios
             .get(apiEndpoint)
             .then((response) => {
-                const ratings = response.data.ratings;
-                const empName = response.data.Empname;
+                const ratings = response.data.employee.ratings;
+                const empName = response.data.employee.Empname;
+                console.log(response.data.employee.ratings.reviewver, "imageUrl")
                 setEmployeeName(empName);
-
+                console.log(response, "ratings");
                 // Initialize Reviewver and Comments to empty strings
                 const formattedData = ratings.map((item) => ({
                     ...item,
-                    Reviewver: false, // Initialize as false
+                    reviewver: 0,  // Or initialize with the default value you want
                     Comments: '',
                 }));
                 setEmployeeData(formattedData);
+                console.log(formattedData, "69");
             })
             .catch((error) => {
                 console.error('Error fetching employee data', error);
@@ -77,13 +80,14 @@ export default function EmployeePortal() {
             return employeeData.filter((data) => data.Value === label);
         });
         setTabData(dataForTabs);
+        // console.log(employeeData, "80");
     }, [employeeData, tabLabels]);
 
 
 
     const handleReviewverChange = (tabIndex, dataIndex, value) => {
         const updatedTabData = [...tabData];
-        updatedTabData[tabIndex][dataIndex].Reviewver = value;
+        updatedTabData[tabIndex][dataIndex].reviewver = value;
         setTabData(updatedTabData);
     };
 
@@ -113,25 +117,21 @@ export default function EmployeePortal() {
 
 
             const formattedData = {
-                Empid: Empid,
-                Empname: employeeName,
-                data: [], // Initialize the data array
+                empid: Empid,
+                empname: employeeName,
+                ratings: employeeData.map((item) => ({
+                    Value: item.Value,
+                    review_point: item.Review_Points,
+                    self_review: item.Self_Review === "1" ? true : false,
+                    Upload: item.imageUrl,
+                    reviewver: item.reviewver,
+                    Comments: item.Comments,
+                })),
             };
-
-            tabData.forEach((tab) => {
-                const tabFormattedData = {
-                    Value: tab[0].Value,
-                    'Review Points': tab.map((item) => item.Review_Points),
-                    'Self-Review': tab.map((item) => item.Self_Review),
-                    'Reviewver': tab.map((item) => item.Reviewver),
-                    'comments': tab.map((item) => item.Comments),
-                    'Upload': tab.map((item) => item.Upload),
-                };
-                formattedData.data.push(tabFormattedData);
-            });
 
             // Send the formatted data to the server using a POST request to update the database
             const apiUrl = `http://172.17.15.253:8080/Manager_EmployeeReviewPost/${Empid}`;
+
 
             axios
                 .post(apiUrl, formattedData)
@@ -205,17 +205,14 @@ export default function EmployeePortal() {
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                            {data.Upload && (
-                                                <>
-                                                  <img src={data.Upload} style={{ maxWidth: '50px', maxHeight: '50px' }} />
-                                                   
-                                                </>
+                                            {data.imageUrl && (
+                                                <img src={data.imageUrl} alt="Employee" style={{ maxWidth: '50px', maxHeight: '50px' }} />
                                             )}
                                         </TableCell>
                                         <TableCell>
-                                        <Select
+                                            <Select
                                                 className="reviewver-dropdown"
-                                                value={data.Reviewver}
+                                                value={data.reviewver}
                                                 onChange={(e) => handleReviewverChange(selectedTab, index, parseInt(e.target.value, 10))}
                                             >
                                                 {[...Array(11).keys()].map((value) => (
