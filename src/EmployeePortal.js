@@ -20,6 +20,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 
@@ -302,9 +303,9 @@ export default function EmployeePortal() {
                                             </TableCell>
                                             <TableCell>
                                                 <Input type="file" onChange={(e) => handleFileChangeForRow(e, index)} />
-                                                <Button type="button" variant="outlined" onClick={() => handleUploadForRow(selectedImageFile, selectedTab, index)}>
+                                                <UploadFileIcon type="button" variant="outlined" onClick={() => handleUploadForRow(selectedImageFile, selectedTab, index)}>
                                                     Upload
-                                                </Button>
+                                                </UploadFileIcon>
                                                 {loading && rowIndex === index && <CircularProgress size={30} />}
                                             </TableCell>
                                         </TableRow>
