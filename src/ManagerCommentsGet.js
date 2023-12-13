@@ -4,6 +4,13 @@ import { useParams } from 'react-router-dom';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {
+    Card,
+    CardContent,
+    Modal,
+} from '@material-ui/core';
+import DownloadIcon from '@mui/icons-material/Download';
+import PreviewIcon from '@mui/icons-material/Preview';
 
 
 export default function EmployeeReviews() {
@@ -13,6 +20,8 @@ export default function EmployeeReviews() {
     const [selectedTab, setSelectedTab] = useState(0);
     const [cumulativeFrequencies, setCumulativeFrequencies] = useState([]);
     const [totalAverage, setTotalAverage] = useState(0); 
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState('');
     const { Empid } = useParams();
 
     const handleTabChange = (event, newValue) => {
@@ -29,7 +38,7 @@ export default function EmployeeReviews() {
 
     useEffect(() => {
         // Fetch data from the API
-        const apiUrl = `http://172.17.15.253:8080/getManagerReviews/${Empid}`;
+        const apiUrl = `http://172.17.15.150:3000/api/emp_manager_checkreviewpoint_data/${Empid}`;
 
         axios
             .get(apiUrl)
@@ -73,12 +82,37 @@ export default function EmployeeReviews() {
         }
     }, [ratings]);
     
-    
+    const handlePreview = (imageUrl) => {
+        setPreviewImageUrl(imageUrl);
+        setPreviewModalOpen(true);
+    };
+
+    const handlePreviewModalClose = () => {
+        setPreviewModalOpen(false);
+        setPreviewImageUrl('');
+    };
+
+    const handleDownload = async (imageUrl) => {
+        const image = await fetch(imageUrl);
+
+        const nameSplit = imageUrl.split("/");
+        const duplicateName = nameSplit.pop();
+
+        const imageBlog = await image.blob()
+        const imageURL = URL.createObjectURL(imageBlog)
+        const link = document.createElement('a')
+        link.href = imageURL;
+        link.download = "" + duplicateName + "";
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    };
 
 
     JSON.parse(localStorage.getItem('practices'));
 
     const Empname = employeeName
+  
 
     return (
         <div>
@@ -140,23 +174,29 @@ export default function EmployeeReviews() {
                                             <TableCell >{data.reviewver}</TableCell>
                                             <TableCell>{data.Manager_Comments}</TableCell>
                                             <TableCell>
-                                            {data.Upload && (
+                                            {data.imageUrl && (
                                                 <>
-                                                  <img src={data.Upload} style={{ maxWidth: '50px', maxHeight: '50px' }} />
-                                                   
+                                                    <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
+                                                    <DownloadIcon onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
                                                 </>
                                             )}
                                         </TableCell>
                                         </TableRow>
                                     ))}
                             </TableBody>
-
                         </Table>
                     </div>
                 </div>
-                {/* <div style={{ flex: '1', marginRight: '5vw' }}>
-                    <FileDownload />
-                </div> */}
+                <Modal open={previewModalOpen} onClose={handlePreviewModalClose}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                        <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor:'#e9ecef' }}>
+                        <Button style={{ textAlign: 'left', fontSize:'26px', justifyContent:'end', color:'black' }} onClick={handlePreviewModalClose}>X</Button>
+                            <CardContent>
+                                <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Modal>
             </div>
 
            {cumulativeFrequencies &&

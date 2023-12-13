@@ -71,7 +71,7 @@ export default function EmployeeReviews() {
         const fetchData = async () => {
             try {
                 // Fetch data from the API
-                const apiUrl = `http://172.17.15.253:8080/getcheckpoints/${Empid}`;
+                const apiUrl = `http://172.17.15.150:3000/api/emp_checkreviewpoint_data/${Empid}`;
 
                 const response = await axios.get(apiUrl);
                 const data = response.data;

@@ -132,7 +132,7 @@ const ButtonCenter = () => {
     const empIdExistsInAPI = empIdExists; // Use the value from state
     try {
       // Fetch the data from the endpoint
-      const response = await fetch(`http://172.17.15.253:8080/getcheckpoints`);
+      const response = await fetch(`http://172.17.15.150:3000/api/emp_checkreviewpoint_data`);
       const data = await response.json();
       console.log(data,"data137")
 

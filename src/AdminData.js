@@ -9,7 +9,7 @@ export default function AdminData() {
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
-        const apiUrl = 'http://172.17.15.253:8080/adminReviewGetData';
+        const apiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_data';
     
         axios.get(apiUrl)
           .then((response) => {
@@ -31,7 +31,7 @@ export default function AdminData() {
       const handleSubmit = (e) => {
         e.preventDefault();
     
-        const apiUrl = 'http://172.17.15.253:8080/adminInsertReview';
+        const apiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_insrt';
     
         axios.post(apiUrl, formData)
           .then((response) => {

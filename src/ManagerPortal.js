@@ -113,7 +113,7 @@ const ManagerPortal = () => {
 
     useEffect(() => {
         // Fetch employee details
-        fetch(`http://172.17.15.253:8080/getcheckpoints`)
+        fetch(`http://172.17.15.150:3000/api/emp_checkreviewpoint_data`)
             .then((response) => response.json())
             .then((data) => {
                 const employeesWithPractices = data.employee;

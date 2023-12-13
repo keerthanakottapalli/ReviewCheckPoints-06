@@ -73,7 +73,7 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         // Fetch admin data
-        const adminApiUrl = 'http://172.17.15.253:8080/adminReviewGetData';
+        const adminApiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_data';
 
         axios
             .get(adminApiUrl)
@@ -168,7 +168,7 @@ export default function EmployeePortal() {
             };
 
             console.log('Formatted Data:', formattedData);
-            const apiUrl = 'http://172.17.15.253:8080/insertReviewPoints';
+            const apiUrl = 'http://172.17.15.150:3000/api/emp_checkreviewpoint_insrt';
 
             await axios.post(apiUrl, formattedData);
 

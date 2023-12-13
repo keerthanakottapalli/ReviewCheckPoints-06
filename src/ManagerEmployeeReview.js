@@ -60,7 +60,7 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         // Fetch employee data from the API using the dynamic Empid
-        const apiEndpoint = `http://172.17.15.253:8080/getcheckpoints/${Empid}`;
+        const apiEndpoint = `http://172.17.15.150:3000/api/emp_checkreviewpoint_data/${Empid}`;
 
         axios
             .get(apiEndpoint)
@@ -167,7 +167,7 @@ export default function EmployeePortal() {
             };
 
             // Send the formatted data to the server using a POST request to update the database
-            const apiUrl = `http://172.17.15.253:8080/Manager_EmployeeReviewPost/${Empid}`;
+            const apiUrl = `http://172.17.15.150:3000/api/emp_manager_checkreviewpoint_insrt`;
 
 
             axios
