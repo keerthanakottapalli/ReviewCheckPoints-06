@@ -31,6 +31,7 @@ import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import DownloadIcon from '@mui/icons-material/Download';
 import PreviewIcon from '@mui/icons-material/Preview';
+import { BASE_URLCHECK } from './config';
 
 export default function EmployeePortal() {
     const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         // Fetch employee data from the API using the dynamic Empid
-        const apiEndpoint = `http://172.17.15.150:3000/api/emp_checkreviewpoint_data/${Empid}`;
+        const apiEndpoint = `${BASE_URLCHECK}/api/emp_checkreviewpoint_data/${Empid}`;
 
         axios
             .get(apiEndpoint)
@@ -167,7 +168,7 @@ export default function EmployeePortal() {
             };
 
             // Send the formatted data to the server using a POST request to update the database
-            const apiUrl = `http://172.17.15.150:3000/api/emp_manager_checkreviewpoint_insrt`;
+            const apiUrl = `${BASE_URLCHECK}/api/emp_manager_checkreviewpoint_insrt`;
 
 
             axios

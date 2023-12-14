@@ -23,6 +23,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
+import { BASE_URLCHECK } from './config';
 
 import axios from 'axios';
 import './EmployeePortal.css'
@@ -73,7 +74,7 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         // Fetch admin data
-        const adminApiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_data';
+        const adminApiUrl = `${BASE_URLCHECK}/admin/emp_checkreviewpoint_data`;
 
         axios
             .get(adminApiUrl)
@@ -168,7 +169,7 @@ export default function EmployeePortal() {
             };
 
             console.log('Formatted Data:', formattedData);
-            const apiUrl = 'http://172.17.15.150:3000/api/emp_checkreviewpoint_insrt';
+            const apiUrl = `${BASE_URLCHECK}/api/emp_checkreviewpoint_insrt`;
 
             await axios.post(apiUrl, formattedData);
 

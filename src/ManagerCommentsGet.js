@@ -11,7 +11,7 @@ import {
 } from '@material-ui/core';
 import DownloadIcon from '@mui/icons-material/Download';
 import PreviewIcon from '@mui/icons-material/Preview';
-
+import { BASE_URLCHECK } from './config';
 
 export default function EmployeeReviews() {
     const navigate = useNavigate();
@@ -38,7 +38,7 @@ export default function EmployeeReviews() {
 
     useEffect(() => {
         // Fetch data from the API
-        const apiUrl = `http://172.17.15.150:3000/api/emp_manager_checkreviewpoint_data/${Empid}`;
+        const apiUrl = `${BASE_URLCHECK}/api/emp_manager_checkreviewpoint_data/${Empid}`;
 
         axios
             .get(apiUrl)

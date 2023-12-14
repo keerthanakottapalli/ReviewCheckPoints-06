@@ -8,7 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-
+import { BASE_URLCHECK } from './config';
 import { BASE_URL } from './config';
 
 
@@ -132,7 +132,7 @@ const ButtonCenter = () => {
     const empIdExistsInAPI = empIdExists; // Use the value from state
     try {
       // Fetch the data from the endpoint
-      const response = await fetch(`http://172.17.15.150:3000/api/emp_checkreviewpoint_data`);
+      const response = await fetch(`${BASE_URLCHECK}/api/emp_checkreviewpoint_data`);
       const data = await response.json();
       console.log(data,"data137")
 

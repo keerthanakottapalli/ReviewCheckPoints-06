@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@mui/material';
 import axios from 'axios';
+import { BASE_URLCHECK } from './config';
 
 
 export default function AdminData() {
@@ -9,7 +10,7 @@ export default function AdminData() {
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
-        const apiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_data';
+        const apiUrl = `${BASE_URLCHECK}/admin/emp_checkreviewpoint_data`;
     
         axios.get(apiUrl)
           .then((response) => {
@@ -31,7 +32,7 @@ export default function AdminData() {
       const handleSubmit = (e) => {
         e.preventDefault();
     
-        const apiUrl = 'http://172.17.15.150:3000/admin/emp_checkreviewpoint_insrt';
+        const apiUrl = `${BASE_URLCHECK}/admin/emp_checkreviewpoint_insrt`;
     
         axios.post(apiUrl, formData)
           .then((response) => {
