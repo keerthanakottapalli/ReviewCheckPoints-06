@@ -22,7 +22,7 @@ import Person3Icon from '@mui/icons-material/Person3';
 import PasswordIcon from '@mui/icons-material/Password';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { BASE_URL } from './config';
-
+  
 const RegistrationForm = () => {
     const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ const RegistrationForm = () => {
     const hr = ['Divya Abburi', 'Sruthi Kolli', 'Lohitha Bandi', 'Ajay Duvvu', 'PadmaPriya Kamsu', 'Vasu Varupula', 'Chandini Sigireddy'];
     const location = ['Miracle City', 'Miracle Heights', 'Miracle Valley', 'Novi USA'];
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({ 
         Empid: '',
         Empmail: '',
         Firstname: '',
@@ -252,7 +252,7 @@ const RegistrationForm = () => {
         <div className="login-form">
             <fieldset style={{ backgroundColor: 'white' }}>
                 <center>
-                    <h2 style={{ marginLeft: "45px" }}>Registration Form</h2>
+                    <h2 style={{ textAlign:'center', textTransform:'uppercase' }}>Registration Form</h2>
                 </center>
                 <form onSubmit={handleSubmit}>
                     <div className="form-row">
@@ -271,7 +271,7 @@ const RegistrationForm = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <PermIdentityIcon />
+                                        <PersonIcon />
                                     </InputAdornment>
                                 ),
                             }}
@@ -362,9 +362,9 @@ const RegistrationForm = () => {
                                 ),
                             }}
                         >
-                            <MenuItem value="" disabled>
+                            {/* <MenuItem value="" disabled>
                                 Select a role
-                            </MenuItem>
+                            </MenuItem> */}
                             {roles.map((role) => (
                                 <MenuItem key={role} value={role}>
                                     {role}
@@ -418,7 +418,7 @@ const RegistrationForm = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Person3Icon />
+                                        <PersonIcon />
                                     </InputAdornment>
                                 ),
                             }}
@@ -481,7 +481,7 @@ const RegistrationForm = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Person3Icon />
+                                        <PersonIcon />
                                     </InputAdornment>
                                 ),
                             }}
@@ -527,6 +527,7 @@ const RegistrationForm = () => {
                     </div>
                     <div style={{ marginBottom: '20px' }}></div>
                     <div>
+                    <p><b>Choose your Profile :</b></p>
                         <TextField
                             variant="outlined"
                             type="file"

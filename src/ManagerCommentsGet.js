@@ -137,17 +137,17 @@ export default function EmployeeReviews() {
                     </Button>
                 </Toolbar>
             </AppBar>
-            <br /><br /><br /><br />
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '80%' }}>
+            <br /><br /><br /><br /><br /><br />
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '90%' }}>
                 <Tabs value={selectedTab} onChange={handleTabChange}>
                     {tabLabels.map((label, index) => (
                         <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
                     ))}
                 </Tabs>
             </div>
-            <div style={{ flex: '1', display: 'flex', }}>
-                <div style={{  marginLeft: '20px', backgroundColor: '#f5f5f5', overflowX: 'auto' }}>
-                    <div style={{ height: '500px', overflowY: 'auto' }}>
+            <div style={{  }}>
+                <div style={{  marginLeft: '50px', backgroundColor: '#f5f5f5', overflowX: 'auto', width:'90vw' }}>
+                    <div style={{ height: '50vh', overflowY: 'auto',  }}>
                         <Table>
                             <TableHead>
                                 <TableRow>
@@ -163,16 +163,16 @@ export default function EmployeeReviews() {
                                     .filter((data) => data.Value === tabLabels[selectedTab])
                                     .map((data, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{data.Review_Points}</TableCell>
-                                            <TableCell>
+                                            <TableCell style={{fontSize:'14px'}}>{data.Review_Points}</TableCell>
+                                            <TableCell style={{textAlign:'center'}}>
                                                 {data.Self_Review === "1" ? (
-                                                    <Button className="yes-button">Yes</Button>
+                                                    <Button  variant='outlined' className="yes-button">Yes</Button>
                                                 ) : (
-                                                    <Button className="no-button">No</Button>
+                                                    <Button   variant='outlined' className="no-button">No</Button>
                                                 )}
                                             </TableCell>
-                                            <TableCell >{data.reviewver}</TableCell>
-                                            <TableCell>{data.Manager_Comments}</TableCell>
+                                            <TableCell style={{fontSize:'14px', textAlign:'center'}}>{data.reviewver}</TableCell>
+                                            <TableCell style={{fontSize:'14px', textAlign:'center'}}>{data.Manager_Comments}</TableCell>
                                             <TableCell>
                                             {data.imageUrl && (
                                                 <>

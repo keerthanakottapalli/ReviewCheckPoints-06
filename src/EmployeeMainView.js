@@ -330,7 +330,7 @@ const ButtonCenter = () => {
             <div className="button-center-container" style={{ flex: 1 }}>
               <div className='Paragraph-division'>
                 <p className=" main-Heading" style={{ color: '#0d4166', marginBottom: '-10px' }}>Fill Form and View Submitted Details.</p>
-                <p className='sub-Heading' style={{ marginBottom: '-10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
+                <p className='sub-Heading' style={{ marginBottom: '-10px', marginLeft:'10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
                 <p className='sub-Heading' style={{ marginBottom: '30px' }}>Click the view details button to review the previously submitted details.</p>
 
               </div>
@@ -363,7 +363,7 @@ const ButtonCenter = () => {
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={() => setOpenDialog(false)} color="primary">
+                  <Button onClick={() => setOpenDialog(false)} variant='contained' style={{backgroundColor:'#00aaee', marginBottom:'10px', marginRight:'10px'}}>
                     OK
                   </Button>
                 </DialogActions>

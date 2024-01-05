@@ -209,7 +209,7 @@ export default function EmployeePortal() {
                     </Button>
                 </Toolbar>
             </AppBar>
-            <br /><br /><br /><br />
+            <br /><br /><br /><br /><br /><br />
             <form onSubmit={handleSubmit}>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '80%', margin: '0 auto' }}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
@@ -219,30 +219,30 @@ export default function EmployeePortal() {
                     </Tabs>
                 </div>
                 <br />
-                <div style={{ maxWidth: '80%', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
+                <div style={{ maxWidth: '90%', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
                     <div style={{ height: '500px', overflowY: 'auto' }}>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell style={{ fontSize: '18px' }}><b>Review Point</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px' }}><b>Self-Review</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px' }}><b>Upload</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px' }}><b>Reviewver</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px' }}><b>Comments</b></TableCell>
+                                    <TableCell style={{ fontSize: '18px', textAlign:'center'  }}><b>Review Point</b></TableCell>
+                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Self-Review</b></TableCell>
+                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Upload</b></TableCell>
+                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Reviewver</b></TableCell>
+                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Comments</b></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {tabData[selectedTab] && tabData[selectedTab].map((data, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{data.Review_Points}</TableCell>
-                                        <TableCell>
+                                        <TableCell style={{ fontSize: '14px',  }}>{data.Review_Points}</TableCell>
+                                        <TableCell style={{ textAlign:'center'  }}>
                                             {data.Self_Review === "1" ? (
                                                 <Button type="button" variant='outlined' className="yes-button">Yes</Button>
                                             ) : (
                                                 <Button type="button" variant='outlined' className="no-button">No</Button>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell style={{ textAlign:'center'  }}>
                                             {data.imageUrl && (
                                                 <>
                                                     <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
@@ -250,7 +250,7 @@ export default function EmployeePortal() {
                                                 </>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell style={{ textAlign:'center'  }}>
                                             <Select
                                                 className="reviewver-dropdown"
                                                 value={data.reviewver}
@@ -263,10 +263,10 @@ export default function EmployeePortal() {
                                                 ))}
                                             </Select>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell style={{ textAlign:'center'}}>
                                             <TextField
                                                 multiline
-                                                rows={4}
+                                                rows={2}
                                                 value={data.Comments}
                                                 onChange={(e) => handleCommentChange(selectedTab, index, e.target.value)}
                                             />
@@ -279,7 +279,7 @@ export default function EmployeePortal() {
                     </div>
                 </div>
                 <br />
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="primary" style={{marginLeft:'80vw'}}>
                     Submit
                 </Button>
                 <Dialog open={openDialog} onClose={handleClose}>

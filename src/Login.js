@@ -143,7 +143,7 @@ return (
             className="textfield"
             placeholder="Enter your email"
             variant="outlined"
-            style={{ width: '100%', maxWidth: '355px', height: '45px' }}
+            style={{ width: '100%', maxWidth: '355px' }}
             value={Empmail}
             onChange={handleChangeEmail}
             required
@@ -166,7 +166,7 @@ return (
             value={Password}
             onChange={handleChangePassword}
             required
-            style={{ width: '100%', maxWidth: '355px', height: '45px' }}
+            style={{ width: '100%', maxWidth: '355px' }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -178,7 +178,7 @@ return (
                   <IconButton
                     onClick={handleTogglePasswordVisibility}
                     edge="end"
-                    style={{ width: '1px', height: '1px', background: '#a9a7a7', marginRight: '0px' }}
+                    style={{ width: '1px', height: '1px', background: '#a9a7a7', marginRight: '0px', marginBottom:'15px' }}
                   >
                     {showPassword ? <VisibilityIcon style={{ color: 'black' }} /> : <VisibilityOffIcon style={{ color: 'black' }} />}
                   </IconButton>
