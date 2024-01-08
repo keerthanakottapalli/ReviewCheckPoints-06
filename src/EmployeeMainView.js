@@ -1,6 +1,6 @@
 import React from 'react';
 import './ButtonCenter.css'; // Create a CSS file for styling
-import { AppBar, Toolbar, Typography, IconButton, Box, Button, DialogTitle, Dialog, DialogContentText, DialogContent, DialogActions, Menu, Tooltip, MenuItem, ListItemIcon, } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box, Button, DialogTitle, Dialog, DialogContentText, DialogContent, DialogActions, Menu, Tooltip, MenuItem, ListItemIcon, Radio, FormControl, FormLabel, InputLabel, Chip, OutlinedInput, } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -8,6 +8,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import TextField from '@material-ui/core/TextField';
+import Select from '@material-ui/core/Select';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import TextareaAutosize from '@material-ui/core/TextareaAutosize';
+
 import { BASE_URLCHECK } from './config';
 import { BASE_URL } from './config';
 
@@ -36,15 +43,24 @@ const ButtonCenter = () => {
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [Empmail, setEmpmail] = useState(atob(localStorage.getItem('empMail')));
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isAddProjectDialogOpen, setAddProjectDialogOpen] = useState(false);
+
 
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering1, setIsHovering1] = useState(false);
+  const [isHovering2, setIsHovering2] = useState(false);
+
+
+  const [projectName, setProjectName] = useState('');
+  const [projectType, setProjectType] = useState(''); // Assuming 'projectType' is a string
+  const [projectScope, setProjectScope] = useState(''); // Assuming 'projectScope' is a string
+  const [techStack, setTechStack] = useState([]);
+  const [description, setDescription] = useState('');
 
   const handleMouseEnter = () => {
     setIsHovering(true);
 
   };
-
   const handleMouseLeave = () => {
     setIsHovering(false);
   };
@@ -56,7 +72,50 @@ const ButtonCenter = () => {
   const handleMouseLeave1 = () => {
     setIsHovering1(false);
   };
+  const handleMouseEnter2 = () => {
+    setIsHovering2(true);
 
+  };
+  const handleMouseLeave2 = () => {
+    setIsHovering2(false);
+  };
+
+
+  const handleRadioChange = (event) => {
+    setProjectScope(event.target.value);
+  };
+
+  const handleOpenAddProjectDialog = () => {
+    setAddProjectDialogOpen(true);
+  };
+
+  const handleCloseAddProjectDialog = () => {
+    setAddProjectDialogOpen(false);
+  };
+
+  const handleSaveProject = () => {
+    // Create an object with the project details
+    const projectDetails = {
+      projectName,
+      projectType,
+      projectScope,
+      techStack,
+      description,
+    };
+  
+    // Retrieve existing projects from localStorage or initialize an empty array
+    const existingProjects = JSON.parse(localStorage.getItem('projectdetails')) || [];
+  
+    // Add the new project to the array
+    existingProjects.push(projectDetails);
+  
+    // Save the updated array back to localStorage
+    localStorage.setItem('projectdetails', JSON.stringify(existingProjects));
+  
+    // Close the dialog
+    handleCloseAddProjectDialog();
+  };
+  
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -134,7 +193,7 @@ const ButtonCenter = () => {
       // Fetch the data from the endpoint
       const response = await fetch(`${BASE_URLCHECK}/api/emp_checkreviewpoint_data`);
       const data = await response.json();
-      console.log(data,"data137")
+      console.log(data, "data137")
 
       // Check if empid from localStorage matches any of the Empid in the fetched data
       const isEmpidExists = data.employee.some((employee) => employee.Empid === parseInt(empid));
@@ -204,6 +263,16 @@ const ButtonCenter = () => {
     }
   };
 
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
 
   const empid = localStorage.getItem('Empid');
   const handleViewDetailsClick = () => {
@@ -330,12 +399,120 @@ const ButtonCenter = () => {
             <div className="button-center-container" style={{ flex: 1 }}>
               <div className='Paragraph-division'>
                 <p className=" main-Heading" style={{ color: '#0d4166', marginBottom: '-10px' }}>Fill Form and View Submitted Details.</p>
-                <p className='sub-Heading' style={{ marginBottom: '-10px', marginLeft:'10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
+                <p className='sub-Heading' style={{ marginBottom: '-10px', marginLeft: '10px' }}>Click the Fill the form button to provide the ratings on your performance.</p>
                 <p className='sub-Heading' style={{ marginBottom: '30px' }}>Click the view details button to review the previously submitted details.</p>
 
               </div>
               <div style={{ textAlign: 'center' }}>
-                <Button style={{ backgroundColor: isHovering ? '#db764f' : '#d95623' }}
+                <Button
+                  style={{ backgroundColor: isHovering2 ? '#db764f' : '#d95623' }}
+                  className="kpi-form"
+                  variant="contained"
+                  onMouseEnter={handleMouseEnter2}
+                  onMouseLeave={handleMouseLeave2}
+                  onClick={handleOpenAddProjectDialog}
+                >
+                  Add Project
+                </Button>
+
+                {/* Add Project Dialog */}
+                <Dialog open={isAddProjectDialogOpen} onClose={handleCloseAddProjectDialog} fullWidth maxWidth="sm">
+                  <DialogTitle style={{ textAlign: 'center' }}>Add Project</DialogTitle>
+                  <DialogContent>
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      {/* Project Name */}
+                      <TextField
+                        label="Project Name"
+                        value={projectName}
+                        onChange={(e) => setProjectName(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      />
+
+                      {/* Project Type */}
+                      <Select
+                        label="Project Type"
+                        value={projectType}
+                        onChange={(e) => setProjectType(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      >
+                        <MenuItem value="frontend">Frontend</MenuItem>
+                        <MenuItem value="backend">Backend</MenuItem>
+                      </Select>
+
+                      {/* Project Scope */}
+                      <Box marginTop="16px">
+                        <FormLabel id="projectScope-label">Project Scope</FormLabel>
+                        <RadioGroup
+                          row
+                          aria-labelledby="projectScope-label"
+                          name="projectScope"
+                          value={projectScope}
+                          onChange={(e) => setProjectScope(e.target.value)}
+                        >
+                          <FormControlLabel value="external" control={<Radio />} label="External" />
+                          <FormControlLabel value="internal" control={<Radio />} label="Internal" />
+                          <FormControlLabel value="poc" control={<Radio />} label="POC" />
+                        </RadioGroup>
+                      </Box>
+
+                      {/* Tech Stack */}
+                      <FormControl fullWidth sx={{ marginY: '16px' }}>
+                        <InputLabel id="demo-multiple-chip-label">TechStack</InputLabel>
+                        <Select
+                          labelId="demo-multiple-chip-label"
+                          id="demo-multiple-chip"
+                          multiple
+                          value={techStack}
+                          onChange={(e) => setTechStack(e.target.value)}
+                          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                          renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {selected.map((value) => (
+                                <Chip key={value} label={value} />
+                              ))}
+                            </Box>
+                          )}
+                          MenuProps={MenuProps}
+                        >
+                          <MenuItem value="Java">Java</MenuItem>
+                          <MenuItem value="JavaScript">JavaScript</MenuItem>
+                          <MenuItem value="Nodejs">Node.js</MenuItem>
+                          <MenuItem value="Angular">Angular</MenuItem>
+                          <MenuItem value="React">React</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Description */}
+                      <textarea
+                        rows={3}
+                        placeholder="Description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        style={{ width: '100%', marginTop: '16px', resize: 'none', padding: '8px', boxSizing: 'border-box', overflowY: 'auto' }}
+                      />
+
+                    </Box>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleCloseAddProjectDialog} color="primary">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveProject} color="primary">
+                      Save
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+
+                <Button style={{ backgroundColor: isHovering ? '#db764f' : '#d95623', marginLeft: '20px' }}
                   className="kpi-form"
                   variant="contained"
                   onClick={handleFillFormClick}
@@ -363,7 +540,7 @@ const ButtonCenter = () => {
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={() => setOpenDialog(false)} variant='contained' style={{backgroundColor:'#00aaee', marginBottom:'10px', marginRight:'10px'}}>
+                  <Button onClick={() => setOpenDialog(false)} variant='contained' style={{ backgroundColor: '#00aaee', marginBottom: '10px', marginRight: '10px' }}>
                     OK
                   </Button>
                 </DialogActions>
