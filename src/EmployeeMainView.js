@@ -10,10 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import TextareaAutosize from '@material-ui/core/TextareaAutosize';
+
 
 import { BASE_URLCHECK } from './config';
 import { BASE_URL } from './config';
@@ -34,7 +31,6 @@ const ButtonCenter = () => {
   const navigate = useNavigate(); // Initialize useNavigate
   const [empIdExists, setEmpIdExists] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
   const [userData, setUserData] = useState(null); // State to store user data
@@ -44,7 +40,15 @@ const ButtonCenter = () => {
   const [Empmail, setEmpmail] = useState(atob(localStorage.getItem('empMail')));
   const [selectedImage, setSelectedImage] = useState(null);
   const [isAddProjectDialogOpen, setAddProjectDialogOpen] = useState(false);
-
+  const [isFillFormActive, setIsFillFormActive] = useState(false);
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [validationErrors, setValidationErrors] = useState({
+    projectName: false,
+    ProjectType: false,
+    projectScope: false,
+    techStack: false,
+    description: false,
+  });
 
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering1, setIsHovering1] = useState(false);
@@ -52,19 +56,18 @@ const ButtonCenter = () => {
 
 
   const [projectName, setProjectName] = useState('');
-  const [projectType, setProjectType] = useState(''); // Assuming 'projectType' is a string
+  const [ProjectType, setProjectType] = useState(''); // Assuming 'projectType' is a string
   const [projectScope, setProjectScope] = useState(''); // Assuming 'projectScope' is a string
   const [techStack, setTechStack] = useState([]);
   const [description, setDescription] = useState('');
 
   const handleMouseEnter = () => {
     setIsHovering(true);
-
   };
+
   const handleMouseLeave = () => {
     setIsHovering(false);
   };
-
   const handleMouseEnter1 = () => {
     setIsHovering1(true);
 
@@ -80,54 +83,58 @@ const ButtonCenter = () => {
     setIsHovering2(false);
   };
 
-
-  const handleRadioChange = (event) => {
-    setProjectScope(event.target.value);
-  };
-
-  const handleOpenAddProjectDialog = () => {
-    setAddProjectDialogOpen(true);
-  };
-
   const handleCloseAddProjectDialog = () => {
     setAddProjectDialogOpen(false);
   };
 
-  const handleSaveProject = () => {
+  const handleValidation = () => {
+    const errors = {
+      projectName: projectName === '',
+      projectType: ProjectType === '',
+      projectScope: projectScope === '',
+      techStack: techStack.length === 0,
+      description: description === '',
+    };
+
+    setValidationErrors(errors);
+
+    // Enable or disable the Save button based on the validation results
+    const hasErrors = Object.values(errors).some((error) => error);
+    setIsSaveDisabled(hasErrors);
+  };
+
+  const handleSaveProject = async () => {
     // Create an object with the project details
     const projectDetails = {
+      empid,  // Include empid in projectDetails
       projectName,
-      projectType,
+      ProjectType,
       projectScope,
       techStack,
       description,
     };
-  
+
     // Retrieve existing projects from localStorage or initialize an empty array
     const existingProjects = JSON.parse(localStorage.getItem('projectdetails')) || [];
-  
+
     // Add the new project to the array
     existingProjects.push(projectDetails);
-  
+
     // Save the updated array back to localStorage
     localStorage.setItem('projectdetails', JSON.stringify(existingProjects));
-  
+
     // Close the dialog
     handleCloseAddProjectDialog();
+
+    // Set isFillFormActive to true
+    setIsFillFormActive(true);
   };
-  
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
+
+
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-  //   const handleChangePassword = () => {
-  //     setShowChangePassword(true);
-  //   };
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -196,7 +203,7 @@ const ButtonCenter = () => {
       console.log(data, "data137")
 
       // Check if empid from localStorage matches any of the Empid in the fetched data
-      const isEmpidExists = data.employee.some((employee) => employee.Empid === parseInt(empid));
+      const isEmpidExists = data.employees.some((employee) => employee.Empid === parseInt(empid));
 
       if (!isEmpidExists) {
         // If empid exists, navigate to the form
@@ -209,6 +216,7 @@ const ButtonCenter = () => {
       console.error('Error fetching data:', error);
     }
   };
+
 
   useEffect(() => {
     // Fetch the registration data from the server when the component mounts
@@ -232,34 +240,51 @@ const ButtonCenter = () => {
     fetchRegistrations();
   }, []);
 
-  const handleImageChange = async (event) => {
+  const handleImageChange = (event) => {
     const file = event.target.files[0];
     setSelectedImage(file);
+    handleCloseUserMenu();
+    const getBase64 = (file, callback) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => callback(reader.result);
+      reader.onerror = (error) => console.error('Error converting file to base64:', error);
+    };
 
     if (file) {
-      // Create a FormData object to send the file and Empmail
-      const formData = new FormData();
-      formData.append('Empmail', Empmail); // Use the key 'Empmail'
-      formData.append('Image', file); // Use the key 'Image'
+      getBase64(file, (base64Image) => {
+        const formData = {
+          firstname,
+          lastname,
+          Image: base64Image,
+        };
 
-      try {
-        const response = await fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
+        fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
           method: 'POST',
-          body: formData,
-        });
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
 
-        if (response.ok) {
-          // Image uploaded successfully, you can show a success message
-          console.log('Image uploaded successfully');
-          window.location.reload();
-          // You may want to refresh the user's profile image
-        } else {
-          // Handle the error (show an error message, etc.)
-          console.error('Image upload failed');
-        }
-      } catch (error) {
-        console.error('Error uploading image:', error);
-      }
+        })
+          .then((response) => {
+            console.log('Raw Response:', response);
+            window.location.reload();
+            return response.json();
+          })
+          .then((data) => {
+            console.log('Parsed Response:', data.message);
+            if (data && data.message === 'Image updated successfully') {
+              console.log('Image uploaded successfully');
+
+            } else {
+              console.error('Image upload failed');
+            }
+          })
+          .catch((error) => {
+            console.error('Error uploading image:', error);
+          });
+      });
     }
   };
 
@@ -283,6 +308,23 @@ const ButtonCenter = () => {
   const firstname = localStorage.getItem('firstname');
   const lastname = localStorage.getItem('lastname');
   const username = firstname + " " + lastname
+
+  const isAddProjectButtonDisabled = (() => {
+    const existingProjects = JSON.parse(localStorage.getItem('projectdetails')) || [];
+    return existingProjects.some(project => project.empid === empid);
+  })();
+
+  const handleOpenAddProjectDialog = () => {
+    // Check if the employee has already added a project
+    if (!isAddProjectButtonDisabled) {
+      setAddProjectDialogOpen(true);
+    }
+    // Optionally, you can provide feedback to the user if the button is disabled
+    else {
+      // Provide feedback (e.g., show a message or disable the button in a different way)
+      console.log("You have already added a project.");
+    }
+  };
 
   return (
     <>
@@ -411,14 +453,16 @@ const ButtonCenter = () => {
                   onMouseEnter={handleMouseEnter2}
                   onMouseLeave={handleMouseLeave2}
                   onClick={handleOpenAddProjectDialog}
+                  disabled={isAddProjectButtonDisabled} // Add the disabled prop
                 >
                   Add Project
                 </Button>
 
+
                 {/* Add Project Dialog */}
                 <Dialog open={isAddProjectDialogOpen} onClose={handleCloseAddProjectDialog} fullWidth maxWidth="sm">
-                  <DialogTitle style={{ textAlign: 'center' }}>Add Project</DialogTitle>
-                  <DialogContent>
+                  <DialogTitle style={{ textAlign: 'center', marginBottom: '-30px' }}><h2>Add Project</h2></DialogTitle>
+                  <DialogContent style={{ paddingLeft: '40px', paddingRight: '40px', width: '100%', maxWidth: 'none' }}>
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -431,38 +475,50 @@ const ButtonCenter = () => {
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
                         fullWidth
+                        required
                         margin="normal"
                         variant="outlined"
+                        error={validationErrors.projectName}
+                        helperText={validationErrors.projectName && 'Project Name is required'}
+                        onBlur={handleValidation}
                       />
 
                       {/* Project Type */}
+                      <FormControl fullWidth sx={{ marginY: '16px' }}>
+                        <InputLabel id="demo-multiple-chip-label">Project Type</InputLabel>
+                        <Select
+                          value={ProjectType}
+                          onChange={(e) => setProjectType(e.target.value)}
+                          fullWidth
+                          margin="normal"
+                          variant="outlined"
+                          style={{ marginBottom: '16px' }}
+                          error={validationErrors.ProjectType}
+                          helperText={validationErrors.ProjectType && 'Project Type is required'}
+                          onBlur={handleValidation}
+                        >
+                          <MenuItem value="frontend">Frontend</MenuItem>
+                          <MenuItem value="backend">Backend</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Project Scope */}
                       <Select
-                        label="Project Type"
-                        value={projectType}
-                        onChange={(e) => setProjectType(e.target.value)}
+                        label="Project Scope"
+                        value={projectScope}
+                        onChange={(e) => setProjectScope(e.target.value)}
                         fullWidth
                         margin="normal"
                         variant="outlined"
+                        style={{ marginBottom: '16px' }}
+                        error={validationErrors.projectScope}
+                        helperText={validationErrors.projectScope && 'Project Scope is required'}
+                        onBlur={handleValidation}
                       >
-                        <MenuItem value="frontend">Frontend</MenuItem>
-                        <MenuItem value="backend">Backend</MenuItem>
+                        <MenuItem value="external">External</MenuItem>
+                        <MenuItem value="internal">Internal</MenuItem>
+                        <MenuItem value="poc">POC</MenuItem>
                       </Select>
-
-                      {/* Project Scope */}
-                      <Box marginTop="16px">
-                        <FormLabel id="projectScope-label">Project Scope</FormLabel>
-                        <RadioGroup
-                          row
-                          aria-labelledby="projectScope-label"
-                          name="projectScope"
-                          value={projectScope}
-                          onChange={(e) => setProjectScope(e.target.value)}
-                        >
-                          <FormControlLabel value="external" control={<Radio />} label="External" />
-                          <FormControlLabel value="internal" control={<Radio />} label="Internal" />
-                          <FormControlLabel value="poc" control={<Radio />} label="POC" />
-                        </RadioGroup>
-                      </Box>
 
                       {/* Tech Stack */}
                       <FormControl fullWidth sx={{ marginY: '16px' }}>
@@ -482,6 +538,9 @@ const ButtonCenter = () => {
                             </Box>
                           )}
                           MenuProps={MenuProps}
+                          error={validationErrors.techStack}
+                          helperText={validationErrors.techStack && 'Tech Stack is required'}
+                          onBlur={handleValidation}
                         >
                           <MenuItem value="Java">Java</MenuItem>
                           <MenuItem value="JavaScript">JavaScript</MenuItem>
@@ -497,27 +556,39 @@ const ButtonCenter = () => {
                         placeholder="Description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        style={{ width: '100%', marginTop: '16px', resize: 'none', padding: '8px', boxSizing: 'border-box', overflowY: 'auto' }}
+                        style={{ width: '100%', marginTop: '16px', resize: 'none', padding: '8px', boxSizing: 'border-box', overflowY: 'auto', marginBottom: '16px' }}
+                        error={validationErrors.description}
+                        helperText={validationErrors.description && 'Description is required'}
+                        onBlur={handleValidation}
                       />
-
                     </Box>
                   </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleCloseAddProjectDialog} color="primary">
+                  <DialogActions style={{ marginBottom: '10px', marginRight: '30px' }}>
+                    <Button onClick={handleCloseAddProjectDialog} style={{ backgroundColor: '#00aaee', color: 'white' }}>
                       Cancel
                     </Button>
-                    <Button onClick={handleSaveProject} color="primary">
+                    <Button
+                      onClick={handleSaveProject}
+                      style={{
+                        backgroundColor: isSaveDisabled ? '#ccc' : '#00aaee',
+                        color: 'white',
+                      }}
+                      disabled={isSaveDisabled}
+                    >
                       Save
                     </Button>
+
                   </DialogActions>
                 </Dialog>
 
-                <Button style={{ backgroundColor: isHovering ? '#db764f' : '#d95623', marginLeft: '20px' }}
+                <Button
+                  style={{ backgroundColor: isHovering ? '#db764f' : '#d95623', marginLeft: '20px' }}
                   className="kpi-form"
                   variant="contained"
                   onClick={handleFillFormClick}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
+                  disabled={!isFillFormActive}  // Disable the button if isFillFormActive is false
                 >
                   Fill Form
                 </Button>

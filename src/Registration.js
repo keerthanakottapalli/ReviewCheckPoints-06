@@ -218,7 +218,7 @@ const RegistrationForm = () => {
                 formDataToSend.append(key, displayPayload[key]);
             }
 
-            const response = await axios.post(`${BASE_URL}/RegistrationKPI`, formDataToSend);
+            const response = await axios.post(`${BASE_URL}/api/emp_register`, formDataToSend);
 
             if (response.status === 200) {
                 console.log('Registration successful');

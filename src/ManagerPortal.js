@@ -112,11 +112,11 @@ const ManagerPortal = () => {
 
 
     useEffect(() => {
-        // Fetch employee details
         fetch(`${BASE_URLCHECK}/api/emp_checkreviewpoint_data`)
             .then((response) => response.json())
             .then((data) => {
-                const employeesWithPractices = data.employee;
+                console.log(data,"data123")
+                const employeesWithPractices = data.employees;
                 localStorage.setItem('practices', JSON.stringify(employeesWithPractices));
 
                 console.log(data,"employeesWithPractices");
@@ -128,6 +128,7 @@ const ManagerPortal = () => {
         fetch(`${BASE_URL}/api/emp_data`)
             .then((response) => response.json())
             .then((data) => {
+                console.log(data,"managerData");
                 const reportingData = data.message.reduce((acc, manager) => {
                     acc[manager.Empid] = manager.Reportingmanager;
                     return acc;
@@ -285,6 +286,7 @@ const ManagerPortal = () => {
                                     <TableBody style={{ marginLeft: '40%' }}>
                                         {employeesData.map((employee) => {
                                             const empReportingManager = reportingManagers[employee.Empid] || '';
+                                            console.log(empReportingManager,"empReportingManager")
                                             if (empReportingManager === username) {
                                                 return (
                                                     <TableRow key={employee.Empid} style={{ fontWeight: 'bold', color: '#333', paddingLeft: '10%' }}>
@@ -438,6 +440,7 @@ const ManagerPortal = () => {
             </div>
         </>
     );
+    
 };
 
 export default ManagerPortal;

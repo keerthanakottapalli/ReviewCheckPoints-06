@@ -12,6 +12,12 @@ import {
     Tabs,
     Button,
     CircularProgress,
+    IconButton,
+    Tooltip,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    DialogTitle,
 
 } from '@mui/material';
 import {
@@ -32,10 +38,13 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 import { BASE_URLCHECK } from './config';
+import { BASE_URL } from './config';
 
 import axios from 'axios';
 import './EmployeePortal.css'
 import { Link, useNavigate } from 'react-router-dom';
+import { AccountCircle, CameraAlt, ExitToApp } from '@material-ui/icons';
+import { Logout } from '@mui/icons-material';
 
 export default function EmployeePortal() {
     const navigate = useNavigate();
@@ -68,17 +77,157 @@ export default function EmployeePortal() {
     const [selectedImageFile, setSelectedImageFile] = useState()
     const [loading, setLoading] = useState(false);
     const [projectDetails, setProjectDetails] = useState([]);
+    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
+    const [userData, setUserData] = useState(null); // State to store user data
+    const [registrations, setRegistrations] = useState([]);
+    const [showImagePreview, setShowImagePreview] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+
+   
+        useEffect(() => {
+            const empid = localStorage.getItem('Empid');
+            const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+            const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
+            console.log(storedProjectDetails, "currentUserDetails");
+            setProjectDetails(currentUserDetails);
+        }, []);
+        
+  
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+
+    const handleOpenProfileCard = async () => {
+        const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
+        try {
+            // Fetch the user data based on empid
+            const response = await fetch(`${BASE_URL}/api/emp_data/${empid}`);
+            const userData = await response.json();
+
+            if (userData.message.length > 0) {
+                // Assuming the API returns an array of users, use the first one
+                setUserData(userData.message[0]);
+                setIsProfileCardOpen(true); // Open the profile card
+                handleCloseUserMenu(); // Close the settings menu
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+    // Function to toggle the Change Password component
+
+
+
+    const handleCloseProfileCard = () => {
+        setIsProfileCardOpen(false); // Close the profile card
+    };
+    const fetchUserProfile = async () => {
+        try {
+            const empid = localStorage.getItem('Empid');
+            const response = await fetch(`${BASE_URL}/api/emp_data?Empid=${empid}`);
+            const data = await response.json();
+
+            // Filter the data to find the user with the matching Empid
+            const userData = data.message.find(user => user.Empid === parseInt(empid, 10));
+
+            if (userData) {
+                // Now you have the user data
+                console.log(userData);
+                // setUserData(userData); // Set the user data in your state if needed
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+    const handleToggleImagePreview = () => {
+        setShowImagePreview(!showImagePreview);
+    };
 
     useEffect(() => {
-        // Retrieve project details from localStorage
-        const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
-        setProjectDetails(storedProjectDetails);
+        if (isProfileCardOpen) {
+            fetchUserProfile();
+        }
+    }, [isProfileCardOpen]);
+
+    useEffect(() => {
+        // Fetch the registration data from the server when the component mounts
+        const fetchRegistrations = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await response.json();
+                setRegistrations(data.message);
+
+                // Extract Firstname from the API response
+                const firstnames = data.message.map(item => item.Firstname);
+
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        };
+
+        fetchRegistrations();
     }, []);
 
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedImage(file);
+        handleCloseUserMenu();
+        const getBase64 = (file, callback) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => callback(reader.result);
+            reader.onerror = (error) => console.error('Error converting file to base64:', error);
+        };
+
+        if (file) {
+            getBase64(file, (base64Image) => {
+                const formData = {
+                    firstname,
+                    lastname,
+                    Image: base64Image,
+                };
+
+                fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+
+                })
+                    .then((response) => {
+                        console.log('Raw Response:', response);
+                        window.location.reload();
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log('Parsed Response:', data.message);
+                        if (data && data.message === 'Image updated successfully') {
+                            console.log('Image uploaded successfully');
+
+                        } else {
+                            console.error('Image upload failed');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error uploading image:', error);
+                    });
+            });
+        }
+    };
 
     const handleClose = () => {
         setOpenDialog(false);
-        navigate('/EmployeeMainView');
+        navigate('/loginForm');
     };
 
     const handleTabChange = (event, newValue) => {
@@ -106,7 +255,7 @@ export default function EmployeePortal() {
                         const employeePoints = reviewPoints.map((point, index) => ({
                             Value: key,
                             ReviewPoint: point,
-                            SelfReview: false,
+                            Self_Review: false,
                             Reviewver: false,
                             Comments: '',
                             imageUrl: ''
@@ -136,7 +285,7 @@ export default function EmployeePortal() {
     const handleButtonClick = (tabIndex, dataIndex, value) => {
 
         const updatedTabData = [...tabData];
-        updatedTabData[tabIndex][dataIndex].SelfReview = value;
+        updatedTabData[tabIndex][dataIndex].Self_Review = value;
         setTabData(updatedTabData);
     };
 
@@ -177,10 +326,19 @@ export default function EmployeePortal() {
         const fullName = empName1 + ' ' + empName2;
 
         try {
+            // Retrieve projectdetails from local storage
+            const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+
+
 
             const formattedData = {
                 empid: empId,
                 empname: fullName,
+                projectName: projectdetails[0].projectName,
+                ProjectType: projectdetails[0].ProjectType,
+                projectScope: projectdetails[0].projectScope,
+                techStack: projectdetails[0].techStack,
+                description: projectdetails[0].description,
                 ratings: employeeData
             };
 
@@ -195,6 +353,7 @@ export default function EmployeePortal() {
             console.error('Error in handleSubmit:', error);
         }
     };
+
 
 
 
@@ -242,16 +401,6 @@ export default function EmployeePortal() {
             setLoading(false);
         }
     };
-    const Item = styled(Paper)(({ theme }) => ({
-        backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-        ...theme.typography.body2,
-        padding: theme.spacing(1),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    }));
-
-
-
 
     const firstname = localStorage.getItem('firstname');
     const lastname = localStorage.getItem('lastname');
@@ -270,19 +419,89 @@ export default function EmployeePortal() {
 
                         <h3 className="username-style">{username}</h3>
                     </div>
-                    <Button color="inherit" onClick={handleClose} className='buttonwrapper'>
-                        <span className='gobackeform'
-
+                    <Box>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleOpenUserMenu}
+                            color="inherit"
                         >
-                            &#8629;
-                        </span>&nbsp;
-                        <b>GoBack</b>
-                    </Button>
+                            <Tooltip title="Open settings">
+
+                                {registrations.map((registration) => (
+                                    registration.Firstname === firstname && (
+                                        <td>
+                                            {registration.Image && (
+                                                <img
+                                                    src={registration.Image}
+                                                    alt="Profile"
+                                                    style={{
+                                                        width: '60px',
+                                                        height: '60px',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+
+                                                />
+                                            )}
+                                        </td>
+                                    )
+                                ))}
+                            </Tooltip>
+                        </IconButton>
+                        <Menu
+                            id="user-menu"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}
+                        >
+                            <MenuItem key="Profile" onClick={handleOpenProfileCard}>
+                                <ListItemIcon>
+                                    <AccountCircle />
+                                </ListItemIcon>
+                                Profile
+                            </MenuItem>
+                            <MenuItem key="ProfileChange">
+                                <label htmlFor="imageUpload">
+                                    <ListItemIcon>
+                                        <CameraAlt fontSize="small" /> {/* Add the CameraAltIcon */}
+                                    </ListItemIcon>
+                                    Profile Change
+                                </label>
+                                <input
+                                    type="file"
+                                    id="imageUpload"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleImageChange}
+                                />
+                            </MenuItem>
+
+                            <MenuItem onClick={handleClose}>
+                                <ListItemIcon>
+                                    <Logout />
+                                </ListItemIcon>
+                                Logout
+                            </MenuItem>
+                        </Menu>
+                    </Box>
                 </Toolbar>
             </AppBar>
-            <br /><br /><br /><br />
+
+            <br /><br /><br /><br /><br />
             <form onSubmit={handleSubmit} >
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '80%', margin: '0 auto' }}>
+                <div style={{ display: 'flex', maxWidth: '80%', marginLeft:'20px' }}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
                         {tabLabels.map((label, index) => (
                             <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -291,25 +510,10 @@ export default function EmployeePortal() {
                 </div>
                 <br />
                 <Grid container spacing={2}>
-                    <Grid item xs={3}>
-                        <Card>
-                            <CardContent>
-                                {projectDetails.map((project, index) => (
-                                    <div key={index}>
-                                        <h3>{project.projectName}</h3>
-                                        <p>Project Type: {project.projectType}</p>
-                                        <p>Project Scope: {project.projectScope}</p>
-                                        <p>TechStack: {project.techStack}</p>
-                                        <p>Description: {project.description}</p>
-                                        {/* Add more fields as needed */}
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
-                    </Grid>
+
                     <Grid item xs={9}>
 
-                        <div style={{ backgroundColor: '#f5f5f5', marginRight: '20px' }}>
+                        <div style={{ backgroundColor: '#f5f5f5', marginLeft:'20px' }}>
                             <div style={{ height: '500px', overflowY: 'auto', border: '1px solid #c7c7c7' }}>
                                 <Table>
                                     <TableHead>
@@ -329,7 +533,7 @@ export default function EmployeePortal() {
                                                         <Button
                                                             variant="outlined"
                                                             type="button"
-                                                            className={`yes-button ${data.SelfReview ? 'selected' : ''}`}
+                                                            className={`yes-button ${data.Self_Review ? 'selected' : ''}`}
                                                             onClick={() => handleButtonClick(selectedTab, index, true)}
                                                         >
                                                             Yes
@@ -337,7 +541,7 @@ export default function EmployeePortal() {
                                                         <Button
                                                             variant="outlined"
                                                             type="button"
-                                                            className={`no-button ${!data.SelfReview ? 'selected' : ''}`}
+                                                            className={`no-button ${!data.Self_Review ? 'selected' : ''}`}
                                                             onClick={() => handleButtonClick(selectedTab, index, false)}
                                                         >
                                                             No
@@ -359,6 +563,22 @@ export default function EmployeePortal() {
                             </div>
                         </div>
 
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Card style={{marginRight:'20px'}}>
+                            <CardContent>
+                                {projectDetails.map((project, index) => (
+                                    <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
+                                        <h2>{project.projectName}</h2>
+                                        <p><b>Project Type: </b>{project.projectType}</p>
+                                        <p><b>Project Scope: </b>{project.projectScope}</p>
+                                        <p><b>TechStack: </b>{project.techStack}</p>
+                                        <p><b>Description: </b>{project.description}</p>
+                                        {/* Add more fields as needed */}
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
                     </Grid>
 
                 </Grid>
@@ -396,7 +616,103 @@ export default function EmployeePortal() {
                     </DialogActions>
                 </Dialog>
             </form>
+            <Dialog
+                open={isProfileCardOpen}
+                onClose={handleCloseProfileCard}
+                fullWidth // Makes the dialog take up the full width of its container
+                maxWidth="sm" // Sets the maximum width of the dialog
+            >
+                <DialogTitle style={{ marginLeft: '33%', fontSize: '24px', fontWeight: 'bolder' }}>Profile Details</DialogTitle>
+                <DialogContent style={{ height: '400px' }}>
+                    {/* Display user profile information */}
+                    {registrations.map((registration) => (
+                        registration.Firstname === firstname && (
+                            <div onClick={handleToggleImagePreview}>
+                                {registration.Image && (
+                                    <img
+                                        src={registration.Image}
+                                        alt="Profile"
+                                        style={{
+                                            borderRadius: "50%",
+                                            cursor: 'pointer',
+                                            height: '120px',
+                                            width: '120px'
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )
+                    ))}<br />
+                    {userData && (
+                        <>
 
+
+                            <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '5%' }}>
+                                <div style={{ marginRight: '20px' }}>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Empid:</span> {userData.Empid}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>First Name:</span> {userData.Firstname}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Last Name:</span> {userData.Lastname}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Email:</span> {atob(userData.Empmail)}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Role:</span> {userData.Role}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Practice:</span> {userData.Practies}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting Manager:</span> {userData.Reportingmanager}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting HR:</span> {userData.Reportinghr}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Location:</span> {userData.Location}
+                                    </p>
+
+                                </div>
+                            </div>
+
+
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseProfileCard} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
+                <DialogContent>
+                    {registrations.map((registration) => (
+                        registration.Firstname === firstname && (
+                            <div>
+                                {registration.Image && (
+                                    <img
+                                        src={registration.Image}
+                                        alt="Profile Preview"
+                                        style={{
+                                            maxWidth: '100%',
+                                            maxHeight: '100%',
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )
+                    ))}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
     Table, TableHead, TableRow, TableCell, TableBody, Tab,
-    Tabs, Button, Typography,
+    Tabs, Button, Typography, Box, Tooltip, Menu, MenuItem, ListItemIcon, Dialog, DialogContent, DialogTitle, DialogActions, Grid,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { BASE_URLCHECK } from './config';
+import { BASE_URL } from './config';
 import {
 
     Card,
@@ -18,7 +19,10 @@ import { useParams } from 'react-router-dom';
 import { AppBar, Toolbar } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 import { saveAs } from 'file-saver';
+import { AccountCircle, CameraAlt } from '@material-ui/icons';
+import { Logout } from '@mui/icons-material';
 
 export default function EmployeeReviews() {
     const navigate = useNavigate();
@@ -28,13 +32,159 @@ export default function EmployeeReviews() {
     const [selectedTab, setSelectedTab] = useState(0);
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState('');
+    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
+    const [userData, setUserData] = useState(null); // State to store user data
+    const [registrations, setRegistrations] = useState([]);
+    const [showImagePreview, setShowImagePreview] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [projectDetails, setProjectDetails] = useState([]);
     const { Empid } = useParams();
+
+    useEffect(() => {
+        const empid = localStorage.getItem('Empid');
+        const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+        const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
+        console.log(storedProjectDetails, "currentUserDetails");
+        setProjectDetails(currentUserDetails);
+    }, []);
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+
+    const handleOpenProfileCard = async () => {
+        const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
+        try {
+            // Fetch the user data based on empid
+            const response = await fetch(`${BASE_URL}/api/emp_data/${empid}`);
+            const userData = await response.json();
+
+            if (userData.message.length > 0) {
+                // Assuming the API returns an array of users, use the first one
+                setUserData(userData.message[0]);
+                setIsProfileCardOpen(true); // Open the profile card
+                handleCloseUserMenu(); // Close the settings menu
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+    // Function to toggle the Change Password component
+
+
+
+    const handleCloseProfileCard = () => {
+        setIsProfileCardOpen(false); // Close the profile card
+    };
+    const fetchUserProfile = async () => {
+        try {
+            const empid = localStorage.getItem('Empid');
+            const response = await fetch(`${BASE_URL}/api/emp_data?Empid=${empid}`);
+            const data = await response.json();
+
+            // Filter the data to find the user with the matching Empid
+            const userData = data.message.find(user => user.Empid === parseInt(empid, 10));
+
+            if (userData) {
+                // Now you have the user data
+                console.log(userData);
+                // setUserData(userData); // Set the user data in your state if needed
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+    const handleToggleImagePreview = () => {
+        setShowImagePreview(!showImagePreview);
+    };
+
+    useEffect(() => {
+        if (isProfileCardOpen) {
+            fetchUserProfile();
+        }
+    }, [isProfileCardOpen]);
+
+    useEffect(() => {
+        // Fetch the registration data from the server when the component mounts
+        const fetchRegistrations = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await response.json();
+                setRegistrations(data.message);
+
+                // Extract Firstname from the API response
+                const firstnames = data.message.map(item => item.Firstname);
+
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        };
+
+        fetchRegistrations();
+    }, []);
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedImage(file);
+        handleCloseUserMenu();
+        const getBase64 = (file, callback) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => callback(reader.result);
+            reader.onerror = (error) => console.error('Error converting file to base64:', error);
+        };
+
+        if (file) {
+            getBase64(file, (base64Image) => {
+                const formData = {
+                    firstname,
+                    lastname,
+                    Image: base64Image,
+                };
+
+                fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+
+                })
+                    .then((response) => {
+                        console.log('Raw Response:', response);
+                        window.location.reload();
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log('Parsed Response:', data.message);
+                        if (data && data.message === 'Image updated successfully') {
+                            console.log('Image uploaded successfully');
+
+                        } else {
+                            console.error('Image upload failed');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error uploading image:', error);
+                    });
+            });
+        }
+    };
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
     };
 
     const tabLabels = [...new Set(ratings.map((data) => data.Value))];
+    console.log(ratings, "ratings")
 
     const handleClose = () => {
         navigate('/EmployeeMainView');
@@ -90,14 +240,12 @@ export default function EmployeeReviews() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch data from the API
                 const apiUrl = `${BASE_URLCHECK}/api/emp_checkreviewpoint_data/${Empid}`;
-
                 const response = await axios.get(apiUrl);
-                const data = response.data;
-                console.log(data, "data");
-                setRatings(data.employee.ratings);
-                setEmployeeName(data.employee.Empname);
+                const checkData = response.data;
+                console.log(checkData, "data");
+                setRatings(checkData.ratings);
+                setEmployeeName(checkData.Empname);
 
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -107,7 +255,9 @@ export default function EmployeeReviews() {
         fetchData();
     }, [Empid]);
 
-    const Empname = employeeName;
+    const firstname = localStorage.getItem('firstname');
+    const lastname = localStorage.getItem('lastname');
+    const username = firstname + " " + lastname
 
     return (
         <div>
@@ -119,68 +269,159 @@ export default function EmployeeReviews() {
                         <Typography variant="h6" className="welcome-text">
                             Welcome
                         </Typography>
-                        <h3 className="username-style">{Empname}</h3>
+                        <h3 className="username-style">{username}</h3>
                     </div>
-                    <Button color="inherit" onClick={handleClose} className='buttonwrapper'>
-                        <span className='gobackeform'>
-                            &#8629;
-                        </span>
-                        <b>GoBack</b>
-                    </Button>
+                    <Box>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleOpenUserMenu}
+                            color="inherit"
+                        >
+                            <Tooltip title="Open settings">
+
+                                {registrations.map((registration) => (
+                                    registration.Firstname === firstname && (
+                                        <td>
+                                            {registration.Image && (
+                                                <img
+                                                    src={registration.Image}
+                                                    alt="Profile"
+                                                    style={{
+                                                        width: '60px',
+                                                        height: '60px',
+                                                        borderRadius: '50%',
+                                                        marginRight: '8px',
+                                                    }}
+
+                                                />
+                                            )}
+                                        </td>
+                                    )
+                                ))}
+                            </Tooltip>
+                        </IconButton>
+                        <Menu
+                            id="user-menu"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}
+                        >
+                            <MenuItem key="Profile" onClick={handleOpenProfileCard}>
+                                <ListItemIcon>
+                                    <AccountCircle />
+                                </ListItemIcon>
+                                Profile
+                            </MenuItem>
+                            <MenuItem key="ProfileChange">
+                                <label htmlFor="imageUpload">
+                                    <ListItemIcon>
+                                        <CameraAlt fontSize="small" /> {/* Add the CameraAltIcon */}
+                                    </ListItemIcon>
+                                    Profile Change
+                                </label>
+                                <input
+                                    type="file"
+                                    id="imageUpload"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleImageChange}
+                                />
+                            </MenuItem>
+
+                            <MenuItem onClick={handleClose}>
+                                <ListItemIcon>
+                                    <Logout />
+                                </ListItemIcon>
+                                Logout
+                            </MenuItem>
+                        </Menu>
+                    </Box>
                 </Toolbar>
             </AppBar>
             <br /><br /><br /><br /><br /><br />
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '80%', margin: '0 auto' }}>
+            <div style={{ display: 'flex', marginLeft:'20px', margin: '0 auto' }}>
                 <Tabs value={selectedTab} onChange={handleTabChange}>
                     {tabLabels.map((label, index) => (
                         <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
                     ))}
                 </Tabs>
             </div>
-            <div style={{ maxWidth: '80%', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
-                <div style={{ height: '500px', overflowY: 'auto' }}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell style={{ fontSize: '18px' }}><b>Review Point</b></TableCell>
-                                <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Self-Review</b></TableCell>
-                                <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Upload</b></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {ratings && ratings.length > 0 ? (
-                                ratings
-                                    .filter((data) => data.Value === tabLabels[selectedTab])
-                                    .map((data, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell style={{ fontSize: '14px' }}>{data.Review_Points}</TableCell>
-                                            <TableCell style={{ textAlign: 'center' }}>
-                                                {data.Self_Review === "1" ? (
-                                                    <Button variant='outlined' className="yes-button">Yes</Button>
-                                                ) : (
-                                                    <Button variant='outlined' className="no-button">No</Button>
-                                                )}
-                                            </TableCell>
-                                            <TableCell style={{ textAlign: 'center' }}>
-                                                {data.imageUrl && (
-                                                    <>
-                                                        <PreviewIcon style={{ cursor: 'pointer' }} onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
-                                                        <DownloadIcon style={{ cursor: 'pointer' }} onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
-                                                    </>
-                                                )}
-                                            </TableCell>
+            <Grid container spacing={2}>
+                <Grid item xs={9}>
+                    <div style={{ marginLeft:'20px', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
+                        <div style={{ height: '500px', overflowY: 'auto' }}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell style={{ fontSize: '18px' }}><b>Review Point</b></TableCell>
+                                        <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Self-Review</b></TableCell>
+                                        <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Upload</b></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {ratings && ratings.length > 0 ? (
+                                        ratings
+                                            .filter((data) => data.Value === tabLabels[selectedTab])
+                                            .map((data, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell style={{ fontSize: '14px' }}>{data.ReviewPoint}</TableCell>
+                                                    <TableCell style={{ textAlign: 'center' }}>
+                                                        {data.Self_Review === "1" ? (
+                                                            <Button variant='outlined' className="yes-button">Yes</Button>
+                                                        ) : (
+                                                            <Button variant='outlined' className="no-button">No</Button>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell style={{ textAlign: 'center' }}>
+                                                        {data.imageUrl && (
+                                                            <>
+                                                                <PreviewIcon style={{ cursor: 'pointer' }} onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
+                                                                <DownloadIcon style={{ cursor: 'pointer' }} onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
+                                                            </>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3}>No data available</TableCell>
                                         </TableRow>
-                                    ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={3}>No data available</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
+                                    )}
+                                </TableBody>
 
-                    </Table>
-                </div>
-            </div>
+                            </Table>
+                        </div>
+                    </div>
+                </Grid>
+                <Grid item xs={3}>
+                <Card style={{marginRight:'20px'}}>
+                            <CardContent>
+                                {projectDetails.map((project, index) => (
+                                    <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
+                                        <h2>{project.projectName}</h2>
+                                        <p><b>Project Type: </b>{project.projectType}</p>
+                                        <p><b>Project Scope: </b>{project.projectScope}</p>
+                                        <p><b>TechStack: </b>{project.techStack}</p>
+                                        <p><b>Description: </b>{project.description}</p>
+                                        {/* Add more fields as needed */}
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                </Grid>
+            </Grid>
             <Modal open={previewModalOpen} onClose={handlePreviewModalClose}>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                     <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#e9ecef' }}>
@@ -195,6 +436,103 @@ export default function EmployeeReviews() {
                     </Card>
                 </div>
             </Modal>
+            <Dialog
+                open={isProfileCardOpen}
+                onClose={handleCloseProfileCard}
+                fullWidth // Makes the dialog take up the full width of its container
+                maxWidth="sm" // Sets the maximum width of the dialog
+            >
+                <DialogTitle style={{ marginLeft: '33%', fontSize: '24px', fontWeight: 'bolder' }}>Profile Details</DialogTitle>
+                <DialogContent style={{ height: '400px' }}>
+                    {/* Display user profile information */}
+                    {registrations.map((registration) => (
+                        registration.Firstname === firstname && (
+                            <div onClick={handleToggleImagePreview}>
+                                {registration.Image && (
+                                    <img
+                                        src={registration.Image}
+                                        alt="Profile"
+                                        style={{
+                                            borderRadius: "50%",
+                                            cursor: 'pointer',
+                                            height: '120px',
+                                            width: '120px'
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )
+                    ))}<br />
+                    {userData && (
+                        <>
+
+
+                            <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '5%' }}>
+                                <div style={{ marginRight: '20px' }}>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Empid:</span> {userData.Empid}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>First Name:</span> {userData.Firstname}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Last Name:</span> {userData.Lastname}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Email:</span> {atob(userData.Empmail)}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Role:</span> {userData.Role}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Practice:</span> {userData.Practies}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting Manager:</span> {userData.Reportingmanager}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting HR:</span> {userData.Reportinghr}
+                                    </p>
+                                    <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                        <span style={{ fontWeight: 'bold', color: 'Black' }}>Location:</span> {userData.Location}
+                                    </p>
+
+                                </div>
+                            </div>
+
+
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseProfileCard} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
+                <DialogContent>
+                    {registrations.map((registration) => (
+                        registration.Firstname === firstname && (
+                            <div>
+                                {registration.Image && (
+                                    <img
+                                        src={registration.Image}
+                                        alt="Profile Preview"
+                                        style={{
+                                            maxWidth: '100%',
+                                            maxHeight: '100%',
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )
+                    ))}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
