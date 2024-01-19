@@ -187,7 +187,7 @@ export default function EmployeeReviews() {
     console.log(ratings, "ratings")
 
     const handleClose = () => {
-        navigate('/EmployeeMainView');
+        navigate('/loginForm');
     };
 
 
@@ -351,7 +351,7 @@ export default function EmployeeReviews() {
                 </Toolbar>
             </AppBar>
             <br /><br /><br /><br /><br /><br />
-            <div style={{ display: 'flex', marginLeft:'20px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', marginLeft:'30px', margin: '0 auto' }}>
                 <Tabs value={selectedTab} onChange={handleTabChange}>
                     {tabLabels.map((label, index) => (
                         <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -360,11 +360,11 @@ export default function EmployeeReviews() {
             </div>
             <Grid container spacing={2}>
                 <Grid item xs={9}>
-                    <div style={{ marginLeft:'20px', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
+                    <div style={{ marginLeft:'30px', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
                         <div style={{ height: '500px', overflowY: 'auto' }}>
                             <Table>
                                 <TableHead>
-                                    <TableRow>
+                                    <TableRow style={{backgroundColor:'#d0e6f5',}}>
                                         <TableCell style={{ fontSize: '18px' }}><b>Review Point</b></TableCell>
                                         <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Self-Review</b></TableCell>
                                         <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Upload</b></TableCell>
@@ -406,7 +406,7 @@ export default function EmployeeReviews() {
                     </div>
                 </Grid>
                 <Grid item xs={3}>
-                <Card style={{marginRight:'20px'}}>
+                <Card style={{marginRight:'20px', backgroundColor: '#f5f5f5'}}>
                             <CardContent>
                                 {projectDetails.map((project, index) => (
                                     <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>

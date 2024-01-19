@@ -9,7 +9,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import TextField from '@material-ui/core/TextField';
-import Select from '@material-ui/core/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 
 import { BASE_URLCHECK } from './config';
@@ -18,9 +18,7 @@ import { BASE_URL } from './config';
 
 
 const handleLogout = () => {
-
   localStorage.removeItem('token');
-
   window.location.href = '/loginform';
 };
 
@@ -44,7 +42,7 @@ const ButtonCenter = () => {
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [validationErrors, setValidationErrors] = useState({
     projectName: false,
-    ProjectType: false,
+    projectType: false,
     projectScope: false,
     techStack: false,
     description: false,
@@ -56,44 +54,55 @@ const ButtonCenter = () => {
 
 
   const [projectName, setProjectName] = useState('');
-  const [ProjectType, setProjectType] = useState(''); // Assuming 'projectType' is a string
+  const [projectType, setProjectType] = useState('');
   const [projectScope, setProjectScope] = useState(''); // Assuming 'projectScope' is a string
   const [techStack, setTechStack] = useState([]);
   const [description, setDescription] = useState('');
+  const [customErrorMessages, setCustomErrorMessages] = useState('');
+
 
   const handleMouseEnter = () => {
     setIsHovering(true);
   };
-
   const handleMouseLeave = () => {
     setIsHovering(false);
   };
   const handleMouseEnter1 = () => {
     setIsHovering1(true);
-
   };
   const handleMouseLeave1 = () => {
     setIsHovering1(false);
   };
   const handleMouseEnter2 = () => {
     setIsHovering2(true);
-
   };
   const handleMouseLeave2 = () => {
     setIsHovering2(false);
   };
-
   const handleCloseAddProjectDialog = () => {
     setAddProjectDialogOpen(false);
   };
 
   const handleValidation = () => {
+    // Custom validation for projectName: should not start with a number
+    const isProjectNameValid = /^[^\d]/.test(projectName);
+
     const errors = {
-      projectName: projectName === '',
-      projectType: ProjectType === '',
-      projectScope: projectScope === '',
+      projectName: projectName.trim() === '' || !isProjectNameValid,
+      projectType: projectType.trim() === '',
+      projectScope: projectScope.trim() === '',
       techStack: techStack.length === 0,
-      description: description === '',
+      description: description.trim() === '',
+    };
+
+    const errorMessages = {
+      projectName: isProjectNameValid
+        ? (errors.projectName && 'Project Name is required') || ''
+        : 'Project Name should not start with a number',
+      projectType: errors.projectType && 'Project Type is required',
+      projectScope: errors.projectScope && 'Project Scope is required',
+      techStack: errors.techStack && 'Tech Stack is required',
+      description: errors.description && 'Description is required',
     };
 
     setValidationErrors(errors);
@@ -101,32 +110,28 @@ const ButtonCenter = () => {
     // Enable or disable the Save button based on the validation results
     const hasErrors = Object.values(errors).some((error) => error);
     setIsSaveDisabled(hasErrors);
+
+    // Set custom error messages
+    setCustomErrorMessages(errorMessages);
   };
+
+
 
   const handleSaveProject = async () => {
     // Create an object with the project details
     const projectDetails = {
       empid,  // Include empid in projectDetails
       projectName,
-      ProjectType,
+      projectType,
       projectScope,
       techStack,
       description,
     };
 
-    // Retrieve existing projects from localStorage or initialize an empty array
     const existingProjects = JSON.parse(localStorage.getItem('projectdetails')) || [];
-
-    // Add the new project to the array
     existingProjects.push(projectDetails);
-
-    // Save the updated array back to localStorage
     localStorage.setItem('projectdetails', JSON.stringify(existingProjects));
-
-    // Close the dialog
     handleCloseAddProjectDialog();
-
-    // Set isFillFormActive to true
     setIsFillFormActive(true);
   };
 
@@ -216,6 +221,8 @@ const ButtonCenter = () => {
       console.error('Error fetching data:', error);
     }
   };
+
+
 
 
   useEffect(() => {
@@ -482,54 +489,63 @@ const ButtonCenter = () => {
                         helperText={validationErrors.projectName && 'Project Name is required'}
                         onBlur={handleValidation}
                       />
-
-                      {/* Project Type */}
-                      <FormControl fullWidth sx={{ marginY: '16px' }}>
-                        <InputLabel id="demo-multiple-chip-label">Project Type</InputLabel>
+                      <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Project Type</InputLabel>
                         <Select
-                          value={ProjectType}
-                          onChange={(e) => setProjectType(e.target.value)}
-                          fullWidth
-                          margin="normal"
-                          variant="outlined"
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="Project Type"
+                          required
+                          value={projectType}
+                          onChange={(e) => {
+                            setProjectType(e.target.value);
+                            handleValidation(); // Trigger validation on change
+                          }}
                           style={{ marginBottom: '16px' }}
-                          error={validationErrors.ProjectType}
-                          helperText={validationErrors.ProjectType && 'Project Type is required'}
-                          onBlur={handleValidation}
+                          error={validationErrors.projectType}
+                          helperText={customErrorMessages.projectType}
                         >
                           <MenuItem value="frontend">Frontend</MenuItem>
                           <MenuItem value="backend">Backend</MenuItem>
                         </Select>
                       </FormControl>
 
-                      {/* Project Scope */}
-                      <Select
-                        label="Project Scope"
-                        value={projectScope}
-                        onChange={(e) => setProjectScope(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                        style={{ marginBottom: '16px' }}
-                        error={validationErrors.projectScope}
-                        helperText={validationErrors.projectScope && 'Project Scope is required'}
-                        onBlur={handleValidation}
-                      >
-                        <MenuItem value="external">External</MenuItem>
-                        <MenuItem value="internal">Internal</MenuItem>
-                        <MenuItem value="poc">POC</MenuItem>
-                      </Select>
+                      <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Project Scope</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="Project Scope"
+                          required
+                          value={projectScope}
+                          onChange={(e) => {
+                            setProjectScope(e.target.value);
+                            handleValidation(); // Trigger validation on change
+                          }}
+                          style={{ marginBottom: '16px' }}
+                          error={validationErrors.projectScope}
+                          helperText={customErrorMessages.projectScope}
+                        >
+                          <MenuItem value="external">External</MenuItem>
+                          <MenuItem value="internal">Internal</MenuItem>
+                          <MenuItem value="poc">POC</MenuItem>
+                        </Select>
+                      </FormControl>
 
-                      {/* Tech Stack */}
-                      <FormControl fullWidth sx={{ marginY: '16px' }}>
+                      <FormControl fullWidth>
                         <InputLabel id="demo-multiple-chip-label">TechStack</InputLabel>
                         <Select
                           labelId="demo-multiple-chip-label"
                           id="demo-multiple-chip"
+                          label="Tech Stack"
+                          required
                           multiple
                           value={techStack}
-                          onChange={(e) => setTechStack(e.target.value)}
-                          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                          onChange={(e) => {
+                            setTechStack(e.target.value);
+                            handleValidation(); // Trigger validation on change
+                          }}
+                          input={<OutlinedInput id="select-multiple-chip" label="Tech Stack" />}
                           renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                               {selected.map((value) => (
@@ -539,8 +555,7 @@ const ButtonCenter = () => {
                           )}
                           MenuProps={MenuProps}
                           error={validationErrors.techStack}
-                          helperText={validationErrors.techStack && 'Tech Stack is required'}
-                          onBlur={handleValidation}
+                          helperText={customErrorMessages.techStack}
                         >
                           <MenuItem value="Java">Java</MenuItem>
                           <MenuItem value="JavaScript">JavaScript</MenuItem>
@@ -550,13 +565,18 @@ const ButtonCenter = () => {
                         </Select>
                       </FormControl>
 
+
                       {/* Description */}
-                      <textarea
+                      <TextField
+                        multiline
                         rows={3}
-                        placeholder="Description"
+                        required
+                        fullWidth
+                        variant="outlined"
+                        label="Description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        style={{ width: '100%', marginTop: '16px', resize: 'none', padding: '8px', boxSizing: 'border-box', overflowY: 'auto', marginBottom: '16px' }}
+                        style={{ marginTop: '16px', boxSizing: 'border-box', overflowY: 'auto', }}
                         error={validationErrors.description}
                         helperText={validationErrors.description && 'Description is required'}
                         onBlur={handleValidation}
@@ -588,7 +608,7 @@ const ButtonCenter = () => {
                   onClick={handleFillFormClick}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
-                  disabled={!isFillFormActive}  // Disable the button if isFillFormActive is false
+                  disabled={!isFillFormActive}
                 >
                   Fill Form
                 </Button>

@@ -51,7 +51,8 @@ const ManagerPortal = () => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     }
-
+    console.log(reportingManagers, "reporting");
+    console.log(employeesData,"employeeData");
     const handleOpenProfileCard = async () => {
         const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
         try {
@@ -70,9 +71,9 @@ const ManagerPortal = () => {
         }
     };
     // Function to toggle the Change Password component
-    const toggleChangePassword = () => {
-        setShowChangePassword(!showChangePassword);
-    };
+    // const toggleChangePassword = () => {
+    //     setShowChangePassword(!showChangePassword);
+    // };
 
 
 
@@ -103,7 +104,6 @@ const ManagerPortal = () => {
         setShowImagePreview(!showImagePreview);
     };
 
-    const [empIdExists, setEmpIdExists] = useState(true);
     useEffect(() => {
         if (isProfileCardOpen) {
             fetchUserProfile();
@@ -112,37 +112,40 @@ const ManagerPortal = () => {
 
 
     useEffect(() => {
-        fetch(`${BASE_URLCHECK}/api/emp_checkreviewpoint_data`)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data,"data123")
-                const employeesWithPractices = data.employees;
-                localStorage.setItem('practices', JSON.stringify(employeesWithPractices));
-
-                console.log(data,"employeesWithPractices");
-                setEmployeesData(employeesWithPractices);
-            })
-            .catch((error) => console.error('Error fetching data:', error));
-
         // Fetch reporting manager details
         fetch(`${BASE_URL}/api/emp_data`)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data,"managerData");
-                const reportingData = data.message.reduce((acc, manager) => {
-                    acc[manager.Empid] = manager.Reportingmanager;
-                    return acc;
-                }, {});
-                setReportingManagers(reportingData);
-            })
-            .catch((error) => console.error('Error fetching reporting managers:', error));
-    }, []);
-
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data, "managerData");
+      
+            const reportingData = data.message.reduce((acc, manager) => {
+              acc[manager.Empid] = manager.Reportingmanager;
+              return acc;
+            }, {});
+      
+            setReportingManagers(reportingData);
+      
+            // After setting reportingManagers, fetch employee data
+            fetch(`${BASE_URLCHECK}/api/emp_checkreviewpoint_data`)
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data, "data123");
+      
+                const employeesWithPractices = data.employees;
+                localStorage.setItem('practices', JSON.stringify(employeesWithPractices));
+      
+                console.log(data, "employeesWithPractices");
+                setEmployeesData(employeesWithPractices);
+              })
+              .catch((error) => console.error('Error fetching data:', error));
+          })
+          .catch((error) => console.error('Error fetching reporting managers:', error));
+      }, []);
+      
     useEffect(() => {
-        // Fetch the registration data from the server when the component mounts
         const fetchRegistrations = async () => {
             try {
-                const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
+                const response = await fetch(`${BASE_URL}/api/emp_data`); 
                 if (!response.ok) {
                     throw new Error('Network response was not ok.');
                 }
@@ -169,7 +172,7 @@ const ManagerPortal = () => {
     const firstname = localStorage.getItem('firstname');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + "" + " " + lastname
-    console.log(username);
+    console.log(username, "username");
 
 
     useEffect(() => {
@@ -285,8 +288,12 @@ const ManagerPortal = () => {
                                     </TableHead>
                                     <TableBody style={{ marginLeft: '40%' }}>
                                         {employeesData.map((employee) => {
-                                            const empReportingManager = reportingManagers[employee.Empid] || '';
-                                            console.log(empReportingManager,"empReportingManager")
+                                            const empReportingManager = reportingManagers[employee.Empid];
+
+                                            console.log('Empid:', employee.Empid);
+                                            console.log('Emp Reporting Manager:', empReportingManager);
+                                            console.log('Username:', username);
+
                                             if (empReportingManager === username) {
                                                 return (
                                                     <TableRow key={employee.Empid} style={{ fontWeight: 'bold', color: '#333', paddingLeft: '10%' }}>
@@ -321,6 +328,7 @@ const ManagerPortal = () => {
                                             }
                                         })}
                                     </TableBody>
+
                                 </Table>
                             ) : (
                                 <Typography
@@ -440,7 +448,7 @@ const ManagerPortal = () => {
             </div>
         </>
     );
-    
+
 };
 
 export default ManagerPortal;

@@ -83,17 +83,19 @@ export default function EmployeePortal() {
     const [registrations, setRegistrations] = useState([]);
     const [showImagePreview, setShowImagePreview] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [activeStep, setActiveStep] = useState(0);
 
-   
-        useEffect(() => {
-            const empid = localStorage.getItem('Empid');
-            const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
-            const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
-            console.log(storedProjectDetails, "currentUserDetails");
-            setProjectDetails(currentUserDetails);
-        }, []);
-        
-  
+
+
+    useEffect(() => {
+        const empid = localStorage.getItem('Empid');
+        const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+        const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
+        console.log(storedProjectDetails, "currentUserDetails");
+        setProjectDetails(currentUserDetails);
+    }, []);
+
+
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -231,7 +233,7 @@ export default function EmployeePortal() {
     };
 
     const handleTabChange = (event, newValue) => {
-        setSelectedTab(newValue);
+        setActiveStep(newValue);
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
@@ -276,20 +278,18 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         const dataForTabs = tabLabels.map((label) => {
-            return employeeData.filter((data) => data.Value === label);
+          return employeeData.filter((data) => data.Value === label);
         });
         setTabData(dataForTabs);
-    }, [employeeData, tabLabels]);
+      }, [employeeData, tabLabels]);
 
 
-    const handleButtonClick = (tabIndex, dataIndex, value) => {
-
+      const handleButtonClick = (tabIndex, dataIndex, value) => {
         const updatedTabData = [...tabData];
         updatedTabData[tabIndex][dataIndex].Self_Review = value;
         setTabData(updatedTabData);
-    };
-
-
+      };
+    
 
 
     const handleFileChangeForRow = (e, rowIndex) => {
@@ -328,19 +328,27 @@ export default function EmployeePortal() {
         try {
             // Retrieve projectdetails from local storage
             const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+            console.log(projectdetails[0].ProjectType, "projecttype")
 
 
 
             const formattedData = {
                 empid: empId,
                 empname: fullName,
-                projectName: projectdetails[0].projectName,
-                ProjectType: projectdetails[0].ProjectType,
-                projectScope: projectdetails[0].projectScope,
-                techStack: projectdetails[0].techStack,
-                description: projectdetails[0].description,
+                projectInfo: [
+                    {
+                        projectName: projectdetails[0].projectName,
+                        ProjectType: projectdetails[0].ProjectType,
+                        projectState: projectdetails[0].projectScope,
+                        techStack: projectdetails[0].techStack,
+                        description: projectdetails[0].description,
+                    }
+                ],
                 ratings: employeeData
             };
+
+            console.log('Formatted Data:', formattedData);
+
 
             console.log('Formatted Data:', formattedData);
             const apiUrl = `${BASE_URLCHECK}/api/emp_checkreviewpoint_insrt`;
@@ -501,7 +509,7 @@ export default function EmployeePortal() {
 
             <br /><br /><br /><br /><br />
             <form onSubmit={handleSubmit} >
-                <div style={{ display: 'flex', maxWidth: '80%', marginLeft:'20px' }}>
+                <div style={{ display: 'flex', maxWidth: '80%', marginLeft: '20px' }}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
                         {tabLabels.map((label, index) => (
                             <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -513,7 +521,7 @@ export default function EmployeePortal() {
 
                     <Grid item xs={9}>
 
-                        <div style={{ backgroundColor: '#f5f5f5', marginLeft:'20px' }}>
+                        <div style={{ backgroundColor: '#f5f5f5', marginLeft: '20px' }}>
                             <div style={{ height: '500px', overflowY: 'auto', border: '1px solid #c7c7c7' }}>
                                 <Table>
                                     <TableHead>
@@ -565,16 +573,15 @@ export default function EmployeePortal() {
 
                     </Grid>
                     <Grid item xs={3}>
-                        <Card style={{marginRight:'20px'}}>
+                        <Card style={{ marginRight: '20px', backgroundColor: '#f5f5f5' }}>
                             <CardContent>
                                 {projectDetails.map((project, index) => (
-                                    <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
+                                    <div key={index} style={{ fontSize: '16px', fontFamily: 'sans-serif' }}>
                                         <h2>{project.projectName}</h2>
                                         <p><b>Project Type: </b>{project.projectType}</p>
                                         <p><b>Project Scope: </b>{project.projectScope}</p>
                                         <p><b>TechStack: </b>{project.techStack}</p>
                                         <p><b>Description: </b>{project.description}</p>
-                                        {/* Add more fields as needed */}
                                     </div>
                                 ))}
                             </CardContent>
