@@ -21,7 +21,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { saveAs } from 'file-saver';
-import { AccountCircle, CameraAlt } from '@material-ui/icons';
+import { AccountCircle, ArrowBack, CameraAlt } from '@material-ui/icons';
 import { Logout } from '@mui/icons-material';
 
 export default function EmployeeReviews() {
@@ -145,12 +145,11 @@ export default function EmployeeReviews() {
         if (file) {
             getBase64(file, (base64Image) => {
                 const formData = {
-                    firstname,
-                    lastname,
+                    empId,
                     Image: base64Image,
                 };
 
-                fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
+                fetch(`${BASE_URL}/api/emp_image_upd/${empId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -236,6 +235,9 @@ export default function EmployeeReviews() {
     };
 
 
+    const goBack = ()=>{
+        navigate('/EmployeeMainView')
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -246,6 +248,10 @@ export default function EmployeeReviews() {
                 console.log(checkData, "data");
                 setRatings(checkData.ratings);
                 setEmployeeName(checkData.Empname);
+                var proData=checkData.projectInfo;
+                // console.log(proData,"249");
+                setProjectDetails(proData)
+
 
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -256,8 +262,10 @@ export default function EmployeeReviews() {
     }, [Empid]);
 
     const firstname = localStorage.getItem('firstname');
+    const empId = localStorage.getItem('Empid');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + " " + lastname
+    console.log(empId,"261");
 
     return (
         <div>
@@ -283,7 +291,7 @@ export default function EmployeeReviews() {
                             <Tooltip title="Open settings">
 
                                 {registrations.map((registration) => (
-                                    registration.Firstname === firstname && (
+                                    registration.Empid == empId && (
                                         <td>
                                             {registration.Image && (
                                                 <img
@@ -350,8 +358,11 @@ export default function EmployeeReviews() {
                     </Box>
                 </Toolbar>
             </AppBar>
-            <br /><br /><br /><br /><br /><br />
-            <div style={{ display: 'flex', marginLeft:'30px', margin: '0 auto' }}>
+            <br /><br /><br />
+            <ListItemIcon style={{marginRight: '90vw', marginTop: '40px', color: 'black', fontSize: '16px', cursor: "pointer"}} onClick={goBack}>
+                                    <ArrowBack />&nbsp; <span><b>Go Back</b></span>   
+                                </ListItemIcon>
+            <div style={{  marginLeft:'30px' }}>
                 <Tabs value={selectedTab} onChange={handleTabChange}>
                     {tabLabels.map((label, index) => (
                         <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -360,7 +371,7 @@ export default function EmployeeReviews() {
             </div>
             <Grid container spacing={2}>
                 <Grid item xs={9}>
-                    <div style={{ marginLeft:'30px', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
+                    <div style={{ marginLeft:'30px', backgroundColor: '#f5f5f5' }}>
                         <div style={{ height: '500px', overflowY: 'auto' }}>
                             <Table>
                                 <TableHead>
@@ -378,7 +389,7 @@ export default function EmployeeReviews() {
                                                 <TableRow key={index}>
                                                     <TableCell style={{ fontSize: '14px' }}>{data.ReviewPoint}</TableCell>
                                                     <TableCell style={{ textAlign: 'center' }}>
-                                                        {data.Self_Review === "1" ? (
+                                                        {data.Self_Review == "1" ? (
                                                             <Button variant='outlined' className="yes-button">Yes</Button>
                                                         ) : (
                                                             <Button variant='outlined' className="no-button">No</Button>
@@ -411,9 +422,9 @@ export default function EmployeeReviews() {
                                 {projectDetails.map((project, index) => (
                                     <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
                                         <h2>{project.projectName}</h2>
-                                        <p><b>Project Type: </b>{project.projectType}</p>
-                                        <p><b>Project Scope: </b>{project.projectScope}</p>
-                                        <p><b>TechStack: </b>{project.techStack}</p>
+                                        <p><b>Type: </b>{project.ProjectType}</p>
+                                        <p><b>Scope: </b>{project.projectScope}</p> 
+                                        <p><b>TechStack: </b>{project.techStack.join(',')}</p>
                                         <p><b>Description: </b>{project.description}</p>
                                         {/* Add more fields as needed */}
                                     </div>
@@ -446,7 +457,7 @@ export default function EmployeeReviews() {
                 <DialogContent style={{ height: '400px' }}>
                     {/* Display user profile information */}
                     {registrations.map((registration) => (
-                        registration.Firstname === firstname && (
+                        registration.Empid == empId && (
                             <div onClick={handleToggleImagePreview}>
                                 {registration.Image && (
                                     <img
@@ -516,7 +527,7 @@ export default function EmployeeReviews() {
             <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
                 <DialogContent>
                     {registrations.map((registration) => (
-                        registration.Firstname === firstname && (
+                        registration.Empid == empId && (
                             <div>
                                 {registration.Image && (
                                     <img

@@ -43,7 +43,7 @@ import { BASE_URL } from './config';
 import axios from 'axios';
 import './EmployeePortal.css'
 import { Link, useNavigate } from 'react-router-dom';
-import { AccountCircle, CameraAlt, ExitToApp } from '@material-ui/icons';
+import { AccountCircle, ArrowBack, CameraAlt, ExitToApp } from '@material-ui/icons';
 import { Logout } from '@mui/icons-material';
 
 export default function EmployeePortal() {
@@ -83,8 +83,7 @@ export default function EmployeePortal() {
     const [registrations, setRegistrations] = useState([]);
     const [showImagePreview, setShowImagePreview] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [activeStep, setActiveStep] = useState(0);
-
+    
 
 
     useEffect(() => {
@@ -229,11 +228,11 @@ export default function EmployeePortal() {
 
     const handleClose = () => {
         setOpenDialog(false);
-        navigate('/loginForm');
+        navigate('/EmployeeMainView');
     };
 
     const handleTabChange = (event, newValue) => {
-        setActiveStep(newValue);
+        setSelectedTab(newValue);
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
@@ -278,18 +277,20 @@ export default function EmployeePortal() {
 
     useEffect(() => {
         const dataForTabs = tabLabels.map((label) => {
-          return employeeData.filter((data) => data.Value === label);
+            return employeeData.filter((data) => data.Value === label);
         });
         setTabData(dataForTabs);
-      }, [employeeData, tabLabels]);
+    }, [employeeData, tabLabels]);
 
 
-      const handleButtonClick = (tabIndex, dataIndex, value) => {
+    const handleButtonClick = (tabIndex, dataIndex, value) => {
+
         const updatedTabData = [...tabData];
         updatedTabData[tabIndex][dataIndex].Self_Review = value;
         setTabData(updatedTabData);
-      };
-    
+    };
+
+
 
 
     const handleFileChangeForRow = (e, rowIndex) => {
@@ -307,8 +308,9 @@ export default function EmployeePortal() {
         });
     };
 
-
-
+    const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+    console.log(projectdetails, "projecttype")
+ 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
@@ -327,8 +329,8 @@ export default function EmployeePortal() {
 
         try {
             // Retrieve projectdetails from local storage
-            const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
-            console.log(projectdetails[0].ProjectType, "projecttype")
+            
+            
 
 
 
@@ -338,8 +340,8 @@ export default function EmployeePortal() {
                 projectInfo: [
                     {
                         projectName: projectdetails[0].projectName,
-                        ProjectType: projectdetails[0].ProjectType,
-                        projectState: projectdetails[0].projectScope,
+                        projectType: projectdetails[0].projectType,
+                        projectScope: projectdetails[0].projectScope,
                         techStack: projectdetails[0].techStack,
                         description: projectdetails[0].description,
                     }
@@ -410,6 +412,11 @@ export default function EmployeePortal() {
         }
     };
 
+    const goBack = ()=>{
+        navigate('/EmployeeMainView')
+    }
+
+    const empId = localStorage.getItem('Empid');
     const firstname = localStorage.getItem('firstname');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + " " + lastname
@@ -436,28 +443,27 @@ export default function EmployeePortal() {
                             onClick={handleOpenUserMenu}
                             color="inherit"
                         >
-                            <Tooltip title="Open settings">
 
-                                {registrations.map((registration) => (
-                                    registration.Firstname === firstname && (
-                                        <td>
-                                            {registration.Image && (
-                                                <img
-                                                    src={registration.Image}
-                                                    alt="Profile"
-                                                    style={{
-                                                        width: '60px',
-                                                        height: '60px',
-                                                        borderRadius: '50%',
-                                                        marginRight: '8px',
-                                                    }}
 
-                                                />
-                                            )}
-                                        </td>
-                                    )
-                                ))}
-                            </Tooltip>
+                            {registrations.map((registration) => (
+                                registration.Empid == empId && (
+                                    <td>
+                                        {registration.Image && (
+                                            <img
+                                                src={registration.Image}
+                                                alt="Profile"
+                                                style={{
+                                                    width: '60px',
+                                                    height: '60px',
+                                                    borderRadius: '50%',
+                                                    marginRight: '8px',
+                                                }}
+
+                                            />
+                                        )}
+                                    </td>
+                                )
+                            ))}
                         </IconButton>
                         <Menu
                             id="user-menu"
@@ -507,7 +513,10 @@ export default function EmployeePortal() {
                 </Toolbar>
             </AppBar>
 
-            <br /><br /><br /><br /><br />
+            <br /><br />
+            <ListItemIcon style={{marginRight:'90vw', marginTop:'60px', cursor: "pointer"}} onClick={goBack}>
+                                    <ArrowBack />&nbsp; <span><b>Go Back</b></span>   
+                                </ListItemIcon>
             <form onSubmit={handleSubmit} >
                 <div style={{ display: 'flex', maxWidth: '80%', marginLeft: '20px' }}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
@@ -516,7 +525,6 @@ export default function EmployeePortal() {
                         ))}
                     </Tabs>
                 </div>
-                <br />
                 <Grid container spacing={2}>
 
                     <Grid item xs={9}>
@@ -578,9 +586,9 @@ export default function EmployeePortal() {
                                 {projectDetails.map((project, index) => (
                                     <div key={index} style={{ fontSize: '16px', fontFamily: 'sans-serif' }}>
                                         <h2>{project.projectName}</h2>
-                                        <p><b>Project Type: </b>{project.projectType}</p>
-                                        <p><b>Project Scope: </b>{project.projectScope}</p>
-                                        <p><b>TechStack: </b>{project.techStack}</p>
+                                        <p><b>Type: </b>{project.projectType}</p>
+                                        <p><b>Scope: </b>{project.projectScope}</p>
+                                        <p><b>TechStack: </b>{project.techStack.join(',')}</p>
                                         <p><b>Description: </b>{project.description}</p>
                                     </div>
                                 ))}
@@ -613,7 +621,7 @@ export default function EmployeePortal() {
                             style={{ maxWidth: '100%', maxHeight: '200px', marginLeft: '23%' }}
                         />
                         <DialogContentText style={{ fontSize: '18px', textAlign: 'center', fontWeight: 'bold', color: '#1dbb99' }}>
-                            Successfully filled the form. Click OK to Login
+                            Successfully Submitted.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -633,7 +641,7 @@ export default function EmployeePortal() {
                 <DialogContent style={{ height: '400px' }}>
                     {/* Display user profile information */}
                     {registrations.map((registration) => (
-                        registration.Firstname === firstname && (
+                        registration.Empid == empId && (
                             <div onClick={handleToggleImagePreview}>
                                 {registration.Image && (
                                     <img
@@ -694,7 +702,7 @@ export default function EmployeePortal() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseProfileCard} color="primary">
+                    <Button onClick={handleCloseProfileCard} variant='contained' style={{backgroundColor:'#00aaee', marginBottom:'10px', marginRight:'10px'}}>
                         Close
                     </Button>
                 </DialogActions>
@@ -703,7 +711,7 @@ export default function EmployeePortal() {
             <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
                 <DialogContent>
                     {registrations.map((registration) => (
-                        registration.Firstname === firstname && (
+                        registration.Empid == empId && (
                             <div>
                                 {registration.Image && (
                                     <img

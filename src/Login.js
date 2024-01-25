@@ -199,7 +199,7 @@ return (
       </form>
 
       <footer>
-        <p className="text-center">&copy; 2023 Miracle Software Systems, Inc.</p>
+        <p className="text-center">&copy; 2024 Miracle Software Systems, Inc.</p>
       </footer>
     </fieldset>
   </div>

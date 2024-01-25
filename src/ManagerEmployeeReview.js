@@ -11,7 +11,14 @@ import {
     Tabs,
     Button,
     Select,
-    MenuItem
+    MenuItem,
+    Grid,
+    ListItemIcon,
+    Menu,
+    Tooltip,
+    IconButton,
+    Box,
+    DialogTitle
 } from '@mui/material';
 import {
 
@@ -32,21 +39,167 @@ import { useNavigate } from 'react-router-dom';
 import DownloadIcon from '@mui/icons-material/Download';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { BASE_URLCHECK } from './config';
+import { BASE_URL } from './config';
+import { Logout } from '@mui/icons-material';
+import { AccountCircle, ArrowBack, CameraAlt } from '@material-ui/icons';
 
 export default function EmployeePortal() {
     const navigate = useNavigate();
     const [employeeData, setEmployeeData] = useState([]);
     const [employeeName, setEmployeeName] = useState(''); // Declare employeeName state
     const [selectedTab, setSelectedTab] = useState(0);
+    const [projectDetails, setProjectDetails] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState('');
-
-    // Create a state variable to store data for each tab
     const [tabData, setTabData] = useState([]);
+    const [selectedImageFile, setSelectedImageFile] = useState()
+    const [loading, setLoading] = useState(false);
+    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const [isProfileCardOpen, setIsProfileCardOpen] = useState(false);
+    const [userData, setUserData] = useState(null); // State to store user data
+    const [registrations, setRegistrations] = useState([]);
+    const [showImagePreview, setShowImagePreview] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    // useEffect(() => {
+    //     const empid = localStorage.getItem('Empid');
+    //     const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+    //     const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
+    //     console.log(storedProjectDetails, "currentUserDetails");
+    //     setProjectDetails(currentUserDetails);
+    // }, []);
+
+    //    console.log(projectDetails,"73");
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
+    };
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+
+    const handleOpenProfileCard = async () => {
+        const empid = localStorage.getItem('Empid'); // Make sure this contains the correct Empid
+        try {
+            // Fetch the user data based on empid
+            const response = await fetch(`${BASE_URL}/api/emp_data/${empid}`);
+            const userData = await response.json();
+
+            if (userData.message.length > 0) {
+                // Assuming the API returns an array of users, use the first one
+                setUserData(userData.message[0]);
+                setIsProfileCardOpen(true); // Open the profile card
+                handleCloseUserMenu(); // Close the settings menu
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    const handleCloseProfileCard = () => {
+        setIsProfileCardOpen(false); // Close the profile card
+    };
+    const fetchUserProfile = async () => {
+        try {
+            const empid = localStorage.getItem('Empid');
+            const response = await fetch(`${BASE_URL}/api/emp_data?Empid=${empid}`);
+            const data = await response.json();
+
+            // Filter the data to find the user with the matching Empid
+            const userData = data.message.find(user => user.Empid === parseInt(empid, 10));
+
+            if (userData) {
+                // Now you have the user data
+                console.log(userData);
+                // setUserData(userData); // Set the user data in your state if needed
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+    const handleToggleImagePreview = () => {
+        setShowImagePreview(!showImagePreview);
+    };
+
+    useEffect(() => {
+        if (isProfileCardOpen) {
+            fetchUserProfile();
+        }
+    }, [isProfileCardOpen]);
+
+    useEffect(() => {
+        // Fetch the registration data from the server when the component mounts
+        const fetchRegistrations = async () => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/emp_data`); // Replace with the correct URL for your backend
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                const data = await response.json();
+                setRegistrations(data.message);
+
+                // Extract Firstname from the API response
+                const firstnames = data.message.map(item => item.Firstname);
+
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        };
+
+        fetchRegistrations();
+    }, []);
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedImage(file);
+        handleCloseUserMenu();
+        const getBase64 = (file, callback) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => callback(reader.result);
+            reader.onerror = (error) => console.error('Error converting file to base64:', error);
+        };
+
+        if (file) {
+            getBase64(file, (base64Image) => {
+                const formData = {
+                    empId,
+                    Image: base64Image,
+                };
+
+                fetch(`${BASE_URL}/api/emp_image_upd/${empId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+
+                })
+                    .then((response) => {
+                        console.log('Raw Response:', response);
+                        window.location.reload();
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log('Parsed Response:', data.message);
+                        if (data && data.message === 'Image updated successfully') {
+                            console.log('Image uploaded successfully');
+
+                        } else {
+                            console.error('Image upload failed');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error uploading image:', error);
+                    });
+            });
+        }
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
@@ -56,7 +209,7 @@ export default function EmployeePortal() {
 
     const handleClose = () => {
         setOpenDialog(false);
-        navigate('/mview');
+        navigate('/loginForm');
     };
 
     useEffect(() => {
@@ -66,15 +219,16 @@ export default function EmployeePortal() {
         axios
             .get(apiEndpoint)
             .then((response) => {
-                const ratings = response.data.employee.ratings;
-                const empName = response.data.employee.Empname;
-                console.log(response.data.employee.ratings.reviewver, "imageUrl")
+                const ratings = response.data.ratings;
+                const empName = response.data.Empname;
+                const projDetails = response.data.projectInfo
+                setProjectDetails(projDetails);
                 setEmployeeName(empName);
-                console.log(response, "ratings");
+                console.log(ratings, "227");
                 // Initialize Reviewver and Comments to empty strings
                 const formattedData = ratings.map((item) => ({
                     ...item,
-                    reviewver: 0,  // Or initialize with the default value you want
+                    reviewver: 0,
                     Comments: '',
                 }));
                 setEmployeeData(formattedData);
@@ -138,7 +292,6 @@ export default function EmployeePortal() {
     const handleSubmit = (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-
         const parseJWT = (token) => {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -148,18 +301,23 @@ export default function EmployeePortal() {
 
         const tokenData = parseJWT(token);
         const empId = tokenData.Empid;
+        const empName1 = tokenData.Firstname;
+        const empName2 = tokenData.Lastname;
+        const fullName = empName1 + ' ' + empName2;
 
         try {
             // Parse the practices data from local storage
-            const practicesData = JSON.parse(localStorage.getItem('practices'));
+            // const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+            // console.log(projectdetails[0].ProjectType, "projecttype")
 
 
             const formattedData = {
-                empid: Empid,
-                empname: employeeName,
+                empid: empId,
+                empname: fullName,
+                projectInfo: projectDetails,
                 ratings: employeeData.map((item) => ({
                     Value: item.Value,
-                    review_point: item.Review_Points,
+                    ReviewPoint: item.ReviewPoint,
                     self_review: item.Self_Review === "1" ? true : false,
                     Upload: item.imageUrl,
                     reviewver: item.reviewver,
@@ -185,10 +343,15 @@ export default function EmployeePortal() {
         }
     };
 
+    const goBack = () => {
+        navigate('/mview')
+    }
 
     JSON.parse(localStorage.getItem('practices'));
-
-    const Empname = employeeName;
+    const empId = localStorage.getItem('Empid');
+    const firstname = localStorage.getItem('firstname');
+    const lastname = localStorage.getItem('lastname');
+    const username = firstname + " " + lastname
 
     return (
         <div>
@@ -199,19 +362,90 @@ export default function EmployeePortal() {
                         <Typography variant="h6" className="welcome-text">
                             Welcome
                         </Typography>
-                        <h3 className="username-style">{Empname}</h3>
+                        <h3 className="username-style">{username}</h3>
                     </div>
-                    <Button color="inherit" onClick={handleClose} className='buttonwrapper'>
-                        <span className='gobackeform'>
-                            &#8629;
-                        </span>
-                        <b>GoBack</b>
-                    </Button>
+                    <Box>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleOpenUserMenu}
+                            color="inherit"
+                        >
+                            {registrations.map((registration) => (
+                                registration.Empid == empId && (
+                                    <td>
+                                        {registration.Image && (
+                                            <img
+                                                src={registration.Image}
+                                                alt="Profile"
+                                                style={{
+                                                    width: '60px',
+                                                    height: '60px',
+                                                    borderRadius: '50%',
+                                                    marginRight: '8px',
+                                                }}
+
+                                            />
+                                        )}
+                                    </td>
+                                )
+                            ))}
+                        </IconButton>
+                        <Menu
+                            id="user-menu"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}
+                        >
+                            <MenuItem key="Profile" onClick={handleOpenProfileCard}>
+                                <ListItemIcon>
+                                    <AccountCircle />
+                                </ListItemIcon>
+                                Profile
+                            </MenuItem>
+                            <MenuItem key="ProfileChange">
+                                <label htmlFor="imageUpload">
+                                    <ListItemIcon>
+                                        <CameraAlt fontSize="small" /> {/* Add the CameraAltIcon */}
+                                    </ListItemIcon>
+                                    Profile Change
+                                </label>
+                                <input
+                                    type="file"
+                                    id="imageUpload"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={handleImageChange}
+                                />
+                            </MenuItem>
+
+                            <MenuItem onClick={handleClose}>
+                                <ListItemIcon>
+                                    <Logout />
+                                </ListItemIcon>
+                                Logout
+                            </MenuItem>
+                        </Menu>
+                    </Box>
                 </Toolbar>
             </AppBar>
-            <br /><br /><br /><br /><br /><br />
+            <br /><br /><br />
+            <ListItemIcon style={{ marginRight: '90vw', marginTop: '40px', color: 'black', fontSize: '16px', cursor: "pointer" }} onClick={goBack}>
+                <ArrowBack />&nbsp; <span><b>Go Back</b></span>
+            </ListItemIcon>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '80%', margin: '0 auto' }}>
+                <div style={{ marginLeft:'30px'}}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
                         {tabLabels.map((label, index) => (
                             <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -219,67 +453,88 @@ export default function EmployeePortal() {
                     </Tabs>
                 </div>
                 <br />
-                <div style={{ maxWidth: '90%', margin: '0 auto', backgroundColor: '#f5f5f5' }}>
-                    <div style={{ height: '500px', overflowY: 'auto' }}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell style={{ fontSize: '18px', textAlign:'center'  }}><b>Review Point</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Self-Review</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Upload</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Reviewver</b></TableCell>
-                                    <TableCell style={{ fontSize: '18px', textAlign:'center' }}><b>Comments</b></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {tabData[selectedTab] && tabData[selectedTab].map((data, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell style={{ fontSize: '14px',  }}>{data.Review_Points}</TableCell>
-                                        <TableCell style={{ textAlign:'center'  }}>
-                                            {data.Self_Review === "1" ? (
-                                                <Button type="button" variant='outlined' className="yes-button">Yes</Button>
-                                            ) : (
-                                                <Button type="button" variant='outlined' className="no-button">No</Button>
-                                            )}
-                                        </TableCell>
-                                        <TableCell style={{ textAlign:'center'  }}>
-                                            {data.imageUrl && (
-                                                <>
-                                                    <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
-                                                    <DownloadIcon onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
-                                                </>
-                                            )}
-                                        </TableCell>
-                                        <TableCell style={{ textAlign:'center'  }}>
-                                            <Select
-                                                className="reviewver-dropdown"
-                                                value={data.reviewver}
-                                                onChange={(e) => handleReviewverChange(selectedTab, index, parseInt(e.target.value, 10))}
-                                            >
-                                                {[...Array(11).keys()].map((value) => (
-                                                    <MenuItem key={value} value={value}>
-                                                        {value}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </TableCell>
-                                        <TableCell style={{ textAlign:'center'}}>
-                                            <TextField
-                                                multiline
-                                                rows={2}
-                                                value={data.Comments}
-                                                onChange={(e) => handleCommentChange(selectedTab, index, e.target.value)}
-                                            />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
+                <Grid container spacing={2}>
 
-                        </Table>
-                    </div>
-                </div>
+                    <Grid item xs={9}>
+                        <div style={{  backgroundColor: '#f5f5f5', marginLeft:'30px' }}>
+                            <div style={{ height: '500px', overflowY: 'auto' }}>
+                                <Table>
+                                    <TableHead style={{ backgroundColor: '#d0e6f5' }}>
+                                        <TableRow>
+                                            <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Review Point</b></TableCell>
+                                            <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Self-Review</b></TableCell>
+                                            <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Upload</b></TableCell>
+                                            <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Reviewver</b></TableCell>
+                                            <TableCell style={{ fontSize: '18px', textAlign: 'center' }}><b>Comments</b></TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {tabData[selectedTab] && tabData[selectedTab].map((data, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell style={{ fontSize: '14px', }}>{data.ReviewPoint}</TableCell>
+                                                <TableCell style={{ textAlign: 'center' }}>
+                                                    {data.Self_Review === "1" ? (
+                                                        <Button type="button" variant='outlined' className="yes-button">Yes</Button>
+                                                    ) : (
+                                                        <Button type="button" variant='outlined' className="no-button">No</Button>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell style={{ textAlign: 'center' }}>
+                                                    {data.imageUrl && (
+                                                        <>
+                                                            <PreviewIcon onClick={() => handlePreview(data.imageUrl)}></PreviewIcon>
+                                                            <DownloadIcon onClick={() => handleDownload(data.imageUrl)}></DownloadIcon>
+                                                        </>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell style={{ textAlign: 'center' }}>
+                                                    <Select
+                                                        className="reviewver-dropdown"
+                                                        value={data.reviewver}
+                                                        onChange={(e) => handleReviewverChange(selectedTab, index, parseInt(e.target.value, 10))}
+                                                    >
+                                                        {[...Array(11).keys()].map((value) => (
+                                                            <MenuItem key={value} value={value}>
+                                                                {value}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </TableCell>
+                                                <TableCell style={{ textAlign: 'center' }}>
+                                                    <TextField
+                                                        multiline
+                                                        rows={2}
+                                                        value={data.Comments}
+                                                        onChange={(e) => handleCommentChange(selectedTab, index, e.target.value)}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+
+                                </Table>
+                            </div>
+                        </div>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Card style={{ marginRight: '20px', backgroundColor: '#f5f5f5' }}>
+                            <CardContent>
+                                {projectDetails.map((project, index) => (
+                                    <div key={index} style={{ fontSize: '16px', fontFamily: 'sans-serif' }}>
+                                        <h2>{project.projectName}</h2>
+                                        <p><b>Type: </b>{project.ProjectType}</p>
+                                        <p><b>Scope: </b>{project.projectScope}</p>
+                                        <p><b>TechStack: </b>{project.techStack.join(',')}</p>
+                                        <p><b>Description: </b>{project.description}</p>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                </Grid>
                 <br />
-                <Button type="submit" variant="contained" color="primary" style={{marginLeft:'80vw'}}>
+                <Button type="submit" variant="contained" color="primary" style={{ marginLeft: '80vw' }}>
                     Submit
                 </Button>
                 <Dialog open={openDialog} onClose={handleClose}>
@@ -299,10 +554,107 @@ export default function EmployeePortal() {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Dialog
+                    open={isProfileCardOpen}
+                    onClose={handleCloseProfileCard}
+                    fullWidth // Makes the dialog take up the full width of its container
+                    maxWidth="sm" // Sets the maximum width of the dialog
+                >
+                    <DialogTitle style={{ marginLeft: '33%', fontSize: '24px', fontWeight: 'bolder' }}>Profile Details</DialogTitle>
+                    <DialogContent style={{ height: '400px' }}>
+                        {/* Display user profile information */}
+                        {registrations.map((registration) => (
+                            registration.Empid == empId && (
+                                <div onClick={handleToggleImagePreview}>
+                                    {registration.Image && (
+                                        <img
+                                            src={registration.Image}
+                                            alt="Profile"
+                                            style={{
+                                                borderRadius: "50%",
+                                                cursor: 'pointer',
+                                                height: '120px',
+                                                width: '120px'
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            )
+                        ))}<br />
+                        {userData && (
+                            <>
+
+
+                                <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '5%' }}>
+                                    <div style={{ marginRight: '20px' }}>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Empid:</span> {userData.Empid}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>First Name:</span> {userData.Firstname}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Last Name:</span> {userData.Lastname}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Email:</span> {atob(userData.Empmail)}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Role:</span> {userData.Role}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Practice:</span> {userData.Practies}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting Manager:</span> {userData.Reportingmanager}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Reporting HR:</span> {userData.Reportinghr}
+                                        </p>
+                                        <p style={{ fontSize: '18px', fontFamily: 'sans-serif', fontStyle: 'initial' }}>
+                                            <span style={{ fontWeight: 'bold', color: 'Black' }}>Location:</span> {userData.Location}
+                                        </p>
+
+                                    </div>
+                                </div>
+
+
+                            </>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseProfileCard} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
+                    <DialogContent>
+                        {registrations.map((registration) => (
+                            registration.Empid == empId && (
+                                <div>
+                                    {registration.Image && (
+                                        <img
+                                            src={registration.Image}
+                                            alt="Profile Preview"
+                                            style={{
+                                                maxWidth: '100%',
+                                                maxHeight: '100%',
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            )
+                        ))}
+                    </DialogContent>
+                </Dialog>
                 <Modal open={previewModalOpen} onClose={handlePreviewModalClose}>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                        <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor:'#e9ecef' }}>
-                        <Button style={{ textAlign: 'left', fontSize:'26px', justifyContent:'end', color:'black' }} onClick={handlePreviewModalClose}>X</Button>
+                        <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#e9ecef' }}>
+                            <Button style={{ textAlign: 'left', fontSize: '26px', justifyContent: 'end', color: 'black' }} onClick={handlePreviewModalClose}>X</Button>
                             <CardContent>
                                 <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
                             </CardContent>

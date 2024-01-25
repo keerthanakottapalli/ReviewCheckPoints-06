@@ -261,12 +261,11 @@ const ButtonCenter = () => {
     if (file) {
       getBase64(file, (base64Image) => {
         const formData = {
-          firstname,
-          lastname,
+          empId,
           Image: base64Image,
         };
 
-        fetch(`${BASE_URL}/api/emp_image_upd/${firstname}/${lastname}`, {
+        fetch(`${BASE_URL}/api/emp_image_upd/${empId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -312,6 +311,7 @@ const ButtonCenter = () => {
     navigate(`/EmployeeGet/${empid}`); // Navigate to the 'mform' route
   };
 
+  const empId = localStorage.getItem('Empid');
   const firstname = localStorage.getItem('firstname');
   const lastname = localStorage.getItem('lastname');
   const username = firstname + " " + lastname
@@ -354,10 +354,10 @@ const ButtonCenter = () => {
               onClick={handleOpenUserMenu}
               color="inherit"
             >
-              <Tooltip title="Open settings">
+             
 
                 {registrations.map((registration) => (
-                  registration.Firstname === firstname && (
+                  registration.Empid == empId && (
                     <td>
                       {registration.Image && (
                         <img
@@ -375,7 +375,6 @@ const ButtonCenter = () => {
                     </td>
                   )
                 ))}
-              </Tooltip>
             </IconButton>
             <Menu
               id="user-menu"
@@ -462,7 +461,7 @@ const ButtonCenter = () => {
                   onClick={handleOpenAddProjectDialog}
                   disabled={isAddProjectButtonDisabled} // Add the disabled prop
                 >
-                  Add Project
+                  <b>Add Project</b>
                 </Button>
 
 
@@ -585,7 +584,7 @@ const ButtonCenter = () => {
                   </DialogContent>
                   <DialogActions style={{ marginBottom: '10px', marginRight: '30px' }}>
                     <Button onClick={handleCloseAddProjectDialog} style={{ backgroundColor: '#00aaee', color: 'white' }}>
-                      Cancel
+                      <b>Cancel</b>
                     </Button>
                     <Button
                       onClick={handleSaveProject}
@@ -595,7 +594,7 @@ const ButtonCenter = () => {
                       }}
                       disabled={isSaveDisabled}
                     >
-                      Save
+                      <b>Save</b>
                     </Button>
 
                   </DialogActions>
@@ -610,13 +609,13 @@ const ButtonCenter = () => {
                   onMouseLeave={handleMouseLeave}
                   disabled={!isFillFormActive}
                 >
-                  Fill Form
+                  <b>Fill Form</b>
                 </Button>
                 <Button style={{ backgroundColor: isHovering1 ? '#db764f' : '#d95623', marginLeft: '20px' }} className="view-details" variant="contained"
                   onClick={handleViewDetailsClick}
                   onMouseEnter={handleMouseEnter1}
                   onMouseLeave={handleMouseLeave1}>
-                  View Details
+                  <b>View Details</b>
                 </Button>
               </div>
               <Dialog open={openDialog} onClose={() => setOpenDialog(false)} >
@@ -632,7 +631,7 @@ const ButtonCenter = () => {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={() => setOpenDialog(false)} variant='contained' style={{ backgroundColor: '#00aaee', marginBottom: '10px', marginRight: '10px' }}>
-                    OK
+                    <b>OK</b>
                   </Button>
                 </DialogActions>
               </Dialog>
@@ -660,7 +659,7 @@ const ButtonCenter = () => {
         <DialogContent style={{ height: '400px' }}>
           {/* Display user profile information */}
           {registrations.map((registration) => (
-            registration.Firstname === firstname && (
+            registration.Empid == empId && (
               <div onClick={handleToggleImagePreview}>
                 {registration.Image && (
                   <img
@@ -721,7 +720,7 @@ const ButtonCenter = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseProfileCard} color="primary">
+          <Button onClick={handleCloseProfileCard} variant='contained' style={{backgroundColor:'#00aaee', marginRight:'10px', marginBottom:'10px'}}>
             Close
           </Button>
         </DialogActions>
@@ -730,7 +729,7 @@ const ButtonCenter = () => {
       <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
         <DialogContent>
           {registrations.map((registration) => (
-            registration.Firstname === firstname && (
+            registration.Empid == empId && (
               <div>
                 {registration.Image && (
                   <img

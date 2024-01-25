@@ -16,9 +16,11 @@ import {
 import { IconButton, Box, DialogTitle, Dialog, DialogContentText, DialogContent, DialogActions, Menu, Tooltip, MenuItem, ListItemIcon, } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BASE_URLCHECK } from './config';
 import { BASE_URL } from './config';
+import { Logout } from '@mui/icons-material';
+import { ArrowBack } from '@material-ui/icons';
 
 const ManagerPortal = () => {
     const [employeesData, setEmployeesData] = useState([]);
@@ -162,7 +164,10 @@ const ManagerPortal = () => {
         fetchRegistrations();
     }, []);
 
-
+    const navigate = useNavigate()
+const goBack = ()=>{
+    navigate('/loginForm')
+}
 
     const handleLogout = () => {
 
@@ -170,6 +175,7 @@ const ManagerPortal = () => {
     };
 
     const firstname = localStorage.getItem('firstname');
+    const empId = localStorage.getItem('Empid');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + "" + " " + lastname
     console.log(username, "username");
@@ -178,7 +184,7 @@ const ManagerPortal = () => {
     useEffect(() => {
         setTimeout(() => {
             setLoading(false);
-        }, 1000);
+        });
     }, []);
     return (
         <>
@@ -200,10 +206,9 @@ const ManagerPortal = () => {
                             onClick={handleOpenUserMenu}
                             color="inherit"
                         >
-                            <Tooltip title="Open settings">
 
                                 {registrations.map((registration) => (
-                                    registration.Firstname === firstname && (
+                                    registration.Empid == empId && (
                                         <td>
                                             {registration.Image && (
                                                 <img
@@ -221,7 +226,6 @@ const ManagerPortal = () => {
                                         </td>
                                     )
                                 ))}
-                            </Tooltip>
                         </IconButton>
                         <Menu
                             id="user-menu"
@@ -250,16 +254,19 @@ const ManagerPortal = () => {
 
                             <MenuItem onClick={handleLogout}>
                                 <ListItemIcon>
-                                    <ArrowBackIcon />
+                                    <Logout />
                                 </ListItemIcon>
-                                GoBack
+                                Logout
                             </MenuItem>
                         </Menu>
                     </Box>
 
                 </Toolbar>
 
-            </AppBar><br /><br /><br /><br />
+            </AppBar>
+            <ListItemIcon style={{marginRight:'85vw', marginTop:'15vh',color:'black', fontSize:'16px', cursor: "pointer"}} onClick={goBack}>
+                                    <ArrowBack />&nbsp; <span><b>Go Back</b></span>   
+                                </ListItemIcon>
             <div className='bg-container'
             >
 
@@ -276,46 +283,46 @@ const ManagerPortal = () => {
                             <div className="loading-spinner"></div>
                         </div>
                     ) : (
-                        <TableContainer component={Paper} style={{ marginTop: '120px' }}>
+                        <TableContainer component={Paper} style={{ marginTop: '40px' }}>
                             {employeesData && employeesData.length > 0 ? (
                                 <Table style={{ minWidth: 850 }}>
-                                    <TableHead style={{ backgroundColor: 'voilet' }}>
+                                    <TableHead>
                                         <TableRow>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#222', paddingLeft: '10%' }}>Employee ID</TableCell>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: '10%' }}>Employee Name</TableCell>
-                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', paddingLeft: '10%' }}>Action</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#222', textAlign:'center'}}>Employee ID</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', textAlign:'center' }}>Employee Name</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold', fontSize: '16px', color: '#333', textAlign:'center' }}>Action</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody style={{ marginLeft: '40%' }}>
                                         {employeesData.map((employee) => {
-                                            const empReportingManager = reportingManagers[employee.Empid];
+                                            const empReportingManager = reportingManagers[employee.empid];
 
-                                            console.log('Empid:', employee.Empid);
+                                            console.log('Empid:', employee.empid);
                                             console.log('Emp Reporting Manager:', empReportingManager);
                                             console.log('Username:', username);
 
                                             if (empReportingManager === username) {
                                                 return (
-                                                    <TableRow key={employee.Empid} style={{ fontWeight: 'bold', color: '#333', paddingLeft: '10%' }}>
-                                                        <TableCell style={{ fontSize: '16px', color: '#333', paddingLeft: '10%' }}>{employee.Empid}</TableCell>
-                                                        <TableCell style={{ fontSize: '16px', color: '#333', paddingLeft: '10%' }}>{employee.Empname}</TableCell>
-                                                        <TableCell style={{ color: '#333', paddingLeft: '10%' }}>
+                                                    <TableRow key={employee.Empid} style={{ fontWeight: 'bold', color: '#333', textAlign:'center' }}>
+                                                        <TableCell style={{ fontSize: '16px', color: '#333', textAlign:'center'}}>{employee.empid}</TableCell>
+                                                        <TableCell style={{ fontSize: '16px', color: '#333', textAlign:'center' }}>{employee.empname}</TableCell>
+                                                        <TableCell style={{ color: '#333', textAlign:'center' }}>
                                                             <Button
                                                                 variant="contained"
                                                                 color="primary"
                                                                 component={Link}
-                                                                to={`/ManagerEmployeeReview/${employee.Empid}`}
-                                                                style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#00aaee' }}
+                                                                to={`/ManagerEmployeeReview/${employee.empid}`}
+                                                                style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#ed454a' }}
                                                             >
-                                                                Add Employee Comments
+                                                                Comments
                                                             </Button>
                                                             &nbsp;&nbsp;&nbsp;
                                                             <Button
                                                                 variant="contained"
                                                                 color="primary"
                                                                 component={Link}
-                                                                to={`/ManagerCommentsGet/${employee.Empid}`}
-                                                                style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#00aaee' }}
+                                                                to={`/ManagerCommentsGet/${employee.empid}`}
+                                                                style={{ fontWeight: 'bold', textDecoration: 'none', backgroundColor: '#0d4167' }}
                                                             >
                                                                 View Details
                                                             </Button>
@@ -359,7 +366,7 @@ const ManagerPortal = () => {
                     <DialogContent style={{ height: '400px' }}>
                         {/* Display user profile information */}
                         {registrations.map((registration) => (
-                            registration.Firstname === firstname && (
+                            registration.Empid == empId && (
                                 <div onClick={handleToggleImagePreview}>
                                     {registration.Image && (
                                         <img
@@ -420,7 +427,7 @@ const ManagerPortal = () => {
                         )}
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseProfileCard} color="primary">
+                        <Button onClick={handleCloseProfileCard} variant='contained' style={{backgroundColor:'#00aaee', marginBottom:'10px', marginRight:'10px'}}>
                             Close
                         </Button>
                     </DialogActions>
@@ -428,7 +435,7 @@ const ManagerPortal = () => {
                 <Dialog open={showImagePreview} onClose={handleToggleImagePreview}>
                     <DialogContent>
                         {registrations.map((registration) => (
-                            registration.Firstname === firstname && (
+                            registration.Empid == empId && (
                                 <div>
                                     {registration.Image && (
                                         <img
