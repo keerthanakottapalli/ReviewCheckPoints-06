@@ -10,7 +10,6 @@ import ManagerEmployeeReview from './ManagerEmployeeReview';
 import ManagerCommentsGet from './ManagerCommentsGet';
 import EmployeeMainView from './EmployeeMainView';
 import EmployeeGet from './EmployeeGet';
-import FirebaseDemo from './FirebaseDemo'
 import Preview from './Preview';
 function App() {
   return (
@@ -27,7 +26,6 @@ function App() {
         <Route path='/ManagerCommentsGet/:Empid' element={< ManagerCommentsGet/>} />
         <Route path='/EmployeeMainView' element={< EmployeeMainView/>} />
         <Route path='/EmployeeGet/:Empid' element={< EmployeeGet/>} />
-        <Route path='/FirebaseDemo' element={< FirebaseDemo/>} />
         <Route path='/Preview' element={< Preview/>} />
       </Routes>
     </Router>
