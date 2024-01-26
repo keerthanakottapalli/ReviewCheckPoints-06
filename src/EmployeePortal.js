@@ -85,7 +85,7 @@ export default function EmployeePortal() {
     const [selectedImage, setSelectedImage] = useState(null);
     
 
-
+    
     useEffect(() => {
         const empid = localStorage.getItem('Empid');
         const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
@@ -308,8 +308,8 @@ export default function EmployeePortal() {
         });
     };
 
-    const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
-    console.log(projectdetails, "projecttype")
+    // const projectdetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+    // console.log(projectdetails, "projecttype")
  
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -330,8 +330,7 @@ export default function EmployeePortal() {
         try {
             // Retrieve projectdetails from local storage
             
-            
-
+      
 
 
             const formattedData = {
@@ -339,11 +338,11 @@ export default function EmployeePortal() {
                 empname: fullName,
                 projectInfo: [
                     {
-                        projectName: projectdetails[0].projectName,
-                        projectType: projectdetails[0].projectType,
-                        projectScope: projectdetails[0].projectScope,
-                        techStack: projectdetails[0].techStack,
-                        description: projectdetails[0].description,
+                        projectName: projectDetails[0].projectName,
+                        projectType: projectDetails[0].projectType,
+                        projectScope: projectDetails[0].projectScope,
+                        techStack: projectDetails[0].techStack,
+                        description: projectDetails[0].description,
                     }
                 ],
                 ratings: employeeData

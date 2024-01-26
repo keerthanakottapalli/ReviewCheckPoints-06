@@ -343,7 +343,7 @@ const ButtonCenter = () => {
             <Typography variant="h6" className="welcome-text">
               Welcome
             </Typography>
-            <h3 className="userName-Style">{username.toUpperCase()}</h3>
+            <h2 className="userName-Style">{username.toUpperCase()}</h2>
           </div>
           <Box>
             <IconButton
@@ -645,9 +645,6 @@ const ButtonCenter = () => {
               />
             </div>
           </div>
-
-
-
         )}
       <Dialog
         open={isProfileCardOpen}

@@ -518,7 +518,7 @@ export default function EmployeeReviews() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseProfileCard} color="primary">
+                    <Button onClick={handleCloseProfileCard} style={{backgroundColor:'#00aaee', color:'white', marginRight:'10px', marginBottom:'10px', fontWeight:'bold'}}>
                         Close
                     </Button>
                 </DialogActions>

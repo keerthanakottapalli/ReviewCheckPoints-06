@@ -61,6 +61,7 @@ export default function EmployeePortal() {
     const [registrations, setRegistrations] = useState([]);
     const [showImagePreview, setShowImagePreview] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [empCredentials, setEmpCredentials] = useState('')
 
     // useEffect(() => {
     //     const empid = localStorage.getItem('Empid');
@@ -71,6 +72,7 @@ export default function EmployeePortal() {
     // }, []);
 
     //    console.log(projectDetails,"73");
+  
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
@@ -203,7 +205,7 @@ export default function EmployeePortal() {
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
-    // console.log(employeeData,"42");
+   
 
     const { Empid } = useParams();
 
@@ -211,6 +213,12 @@ export default function EmployeePortal() {
         setOpenDialog(false);
         navigate('/loginForm');
     };
+
+    const handleBack = () =>
+    {
+        setOpenDialog(false);
+        navigate('/mview');
+    }
 
     useEffect(() => {
         // Fetch employee data from the API using the dynamic Empid
@@ -224,7 +232,8 @@ export default function EmployeePortal() {
                 const projDetails = response.data.projectInfo
                 setProjectDetails(projDetails);
                 setEmployeeName(empName);
-                console.log(ratings, "227");
+                setEmpCredentials(response.data)
+                // console.log(response.data, "227");
                 // Initialize Reviewver and Comments to empty strings
                 const formattedData = ratings.map((item) => ({
                     ...item,
@@ -312,8 +321,8 @@ export default function EmployeePortal() {
 
 
             const formattedData = {
-                empid: empId,
-                empname: fullName,
+                empid: empCredentials.empid,
+                empname: empCredentials.empname,
                 projectInfo: projectDetails,
                 ratings: employeeData.map((item) => ({
                     Value: item.Value,
@@ -347,11 +356,19 @@ export default function EmployeePortal() {
         navigate('/mview')
     }
 
-    JSON.parse(localStorage.getItem('practices'));
+    var userId = JSON.parse(localStorage.getItem('practices'));
+
+    var userData1=userId[0].empid
+    console.log(userData1,"352");
+    // const storedData = localStorage.getItem('practices');
+    // const employeesWithPractices = JSON.parse(storedData);
+    // const managerempid = employeesWithPractices[0].Empid;
+    // console.log(userId,"351");
     const empId = localStorage.getItem('Empid');
     const firstname = localStorage.getItem('firstname');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + " " + lastname
+    console.log(empId,"355");
 
     return (
         <div>
@@ -473,7 +490,7 @@ export default function EmployeePortal() {
                                             <TableRow key={index}>
                                                 <TableCell style={{ fontSize: '14px', }}>{data.ReviewPoint}</TableCell>
                                                 <TableCell style={{ textAlign: 'center' }}>
-                                                    {data.Self_Review === "1" ? (
+                                                    {data.Self_Review == "1" ? (
                                                         <Button type="button" variant='outlined' className="yes-button">Yes</Button>
                                                     ) : (
                                                         <Button type="button" variant='outlined' className="no-button">No</Button>
@@ -492,7 +509,15 @@ export default function EmployeePortal() {
                                                         className="reviewver-dropdown"
                                                         value={data.reviewver}
                                                         onChange={(e) => handleReviewverChange(selectedTab, index, parseInt(e.target.value, 10))}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                style: {
+                                                                    maxHeight: 200, // Set the maximum height for the dropdown
+                                                                },
+                                                            },
+                                                        }}
                                                     >
+                                                        
                                                         {[...Array(11).keys()].map((value) => (
                                                             <MenuItem key={value} value={value}>
                                                                 {value}
@@ -549,7 +574,7 @@ export default function EmployeePortal() {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleClose} color="primary" style={{ color: 'black', backgroundColor: '#d8d6d6', fontWeight: 'bolder' }}>
+                        <Button onClick={handleBack} color="primary" style={{ color: 'black', backgroundColor: '#d8d6d6', fontWeight: 'bolder' }}>
                             OK
                         </Button>
                     </DialogActions>

@@ -33,14 +33,14 @@ export default function EmployeeReviews() {
     const [selectedImage, setSelectedImage] = useState(null);
     const [projectDetails, setProjectDetails] = useState([]);
     const { Empid } = useParams();
-    const empid = localStorage.getItem('Empid');
-    useEffect(() => {
+   
+    // useEffect(() => {
 
-        const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
-        const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
-        console.log(storedProjectDetails, "currentUserDetails");
-        setProjectDetails(currentUserDetails);
-    }, []);
+    //     const storedProjectDetails = JSON.parse(localStorage.getItem('projectdetails')) || [];
+    //     const currentUserDetails = storedProjectDetails.filter(project => project.empid === empid);
+    //     console.log(storedProjectDetails, "currentUserDetails");
+    //     setProjectDetails(currentUserDetails);
+    // }, []);
 
 
     const handleOpenUserMenu = (event) => {
@@ -187,10 +187,10 @@ export default function EmployeeReviews() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const apiUrl = `${BASE_URLCHECK}/api/emp_manager_checkreviewpoint_data/${empid}`;
+                const apiUrl = `${BASE_URLCHECK}/api/emp_manager_checkreviewpoint_data/${Empid}`;
                 const response = await axios.get(apiUrl);
                 const checkData = response.data;
-                console.log(checkData.ratings, "data");
+                console.log(response, "193");
                 var proData = response.data.projectInfo
                 console.log(proData, '195');
                 setProjectDetails(proData)
@@ -261,7 +261,10 @@ export default function EmployeeReviews() {
     };
 
 
-    JSON.parse(localStorage.getItem('practices'));
+    const storedData = localStorage.getItem('practices');
+    const employeesWithPractices = JSON.parse(storedData);
+    const managerempid = employeesWithPractices[0].Empid;
+
     const empId = localStorage.getItem('Empid')
     const firstname = localStorage.getItem('firstname')
     const lastname = localStorage.getItem('lastname')
@@ -422,7 +425,7 @@ export default function EmployeeReviews() {
                             {projectDetails.map((project, index) => (
                                 <div key={index} style={{ fontSize: '16px', fontFamily: 'sans-serif' }}>
                                     <h2>{project.projectName}</h2>
-                                    <p><b>Type: </b>{project.ProjectType}</p>
+                                    <p><b>Type: </b>{project.projectType}</p>
                                     <p><b>Scope: </b>{project.projectScope}</p>
                                     <p><b>TechStack: </b>{project.techStack.join(',')}</p>
                                     <p><b>Description: </b>{project.description}</p>
