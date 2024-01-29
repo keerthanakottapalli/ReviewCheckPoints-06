@@ -207,7 +207,7 @@ export default function EmployeeReviews() {
             const filename = decodeURIComponent(filenameWithEncoding);
 
             // Fetch the image from the provided API endpoint
-            const response = await fetch(`http://172.17.15.150:3000/Download?url=${encodeURIComponent(imageUrl)}`);
+            const response = await fetch(`${BASE_URLCHECK}/Download?url=${encodeURIComponent(imageUrl)}`);
 
             // Check if the response is successful (status code 200)
             if (response.ok) {
@@ -422,7 +422,7 @@ export default function EmployeeReviews() {
                                 {projectDetails.map((project, index) => (
                                     <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
                                         <h2>{project.projectName}</h2>
-                                        <p><b>Type: </b>{project.ProjectType}</p>
+                                        <p><b>Type: </b>{project.projectType}</p>
                                         <p><b>Scope: </b>{project.projectScope}</p> 
                                         <p><b>TechStack: </b>{project.techStack.join(',')}</p>
                                         <p><b>Description: </b>{project.description}</p>

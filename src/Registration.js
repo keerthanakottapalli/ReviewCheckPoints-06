@@ -51,7 +51,7 @@ const RegistrationForm = () => {
 
     const validateEmpId = (empId) => {
         return empId.trim() !== '';
-    };
+      };
 
     const [openDialog, setOpenDialog] = useState(false);
     const [fileError, setFileError] = useState('');
@@ -64,41 +64,41 @@ const RegistrationForm = () => {
     const handleChange = (event) => {
         const { name, value, type, files } = event.target;
         const newValue = type === 'file' ? files[0] : value;
-
+        
         if (name === 'Empid' && value.trim() !== '' && !validateInteger(value)) {
             setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: 'Please enter integer values.',
+              ...prevErrors,
+              [name]: 'Please enter integer values.',
             }));
-        } else {
+          } else {
             setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: '',
+              ...prevErrors,
+              [name]: '',
             }));
-        }
+          }
         if (name === 'Empmail') {
-            if (!/^[a-zA-Z]{3,}[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/.test(value)) {
-                setValidationErrors((prevErrors) => ({
-                    ...prevErrors,
-                    [name]: 'Please enter a valid email address.',
-                }));
+            if (!/^[a-zA-Z][\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/.test(value)) {
+              setValidationErrors((prevErrors) => ({
+                ...prevErrors,
+                [name]: 'Please enter a valid email address. Ex: Abc@miraclesoft.com',
+              }));
             } else if (!value.endsWith('@miraclesoft.com')) {
-                setValidationErrors((prevErrors) => ({
-                    ...prevErrors,
-                    [name]: 'Email must end with @miraclesoft.com',
-                }));
+              setValidationErrors((prevErrors) => ({
+                ...prevErrors,
+                [name]: 'Email must end with @miraclesoft.com',
+              }));
             } else if (value.split('@').length - 1 > 1) {
-                setValidationErrors((prevErrors) => ({
-                    ...prevErrors,
-                    [name]: "Only one '@' is allowed",
-                }));
+              setValidationErrors((prevErrors) => ({
+                ...prevErrors,
+                [name]: "Only one '@' is allowed",
+              }));
             } else {
-                setValidationErrors((prevErrors) => ({
-                    ...prevErrors,
-                    [name]: '', // Clear the error when the format is correct
-                }));
+              setValidationErrors((prevErrors) => ({
+                ...prevErrors,
+                [name]: '', // Clear the error when the format is correct
+              }));
             }
-        }
+          }
         if (name === 'Password') {
             if (value.length < 8) {
                 setValidationErrors((prevErrors) => ({
