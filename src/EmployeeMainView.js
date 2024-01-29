@@ -41,11 +41,11 @@ const ButtonCenter = () => {
   const [isFillFormActive, setIsFillFormActive] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [validationErrors, setValidationErrors] = useState({
-    projectName: false,
-    projectType: false,
-    projectScope: false,
-    techStack: false,
-    description: false,
+    projectName: '',
+    projectType: '',
+    projectScope: '',
+    techStack: '',
+    description: '',
   });
 
   const [isHovering, setIsHovering] = useState(false);
@@ -84,7 +84,6 @@ const ButtonCenter = () => {
   };
 
   const handleValidation = () => {
-    // Custom validation for projectName: should not start with a number
     const isProjectNameValid = /^[^\d]/.test(projectName);
 
     const errors = {
@@ -105,14 +104,10 @@ const ButtonCenter = () => {
       description: errors.description && 'Description is required',
     };
 
-    setValidationErrors(errors);
+    setValidationErrors(errorMessages);
 
-    // Enable or disable the Save button based on the validation results
     const hasErrors = Object.values(errors).some((error) => error);
     setIsSaveDisabled(hasErrors);
-
-    // Set custom error messages
-    setCustomErrorMessages(errorMessages);
   };
 
 
@@ -354,27 +349,27 @@ const ButtonCenter = () => {
               onClick={handleOpenUserMenu}
               color="inherit"
             >
-             
 
-                {registrations.map((registration) => (
-                  registration.Empid == empId && (
-                    <td>
-                      {registration.Image && (
-                        <img
-                          src={registration.Image}
-                          alt="Profile"
-                          style={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '50%',
-                            marginRight: '8px',
-                          }}
 
-                        />
-                      )}
-                    </td>
-                  )
-                ))}
+              {registrations.map((registration) => (
+                registration.Empid == empId && (
+                  <td>
+                    {registration.Image && (
+                      <img
+                        src={registration.Image}
+                        alt="Profile"
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '50%',
+                          marginRight: '8px',
+                        }}
+
+                      />
+                    )}
+                  </td>
+                )
+              ))}
             </IconButton>
             <Menu
               id="user-menu"
@@ -475,7 +470,6 @@ const ButtonCenter = () => {
                       alignItems="center"
                       justifyContent="center"
                     >
-                      {/* Project Name */}
                       <TextField
                         label="Project Name"
                         value={projectName}
@@ -484,10 +478,11 @@ const ButtonCenter = () => {
                         required
                         margin="normal"
                         variant="outlined"
-                        error={validationErrors.projectName}
-                        helperText={validationErrors.projectName && 'Project Name is required'}
+                        error={Boolean(validationErrors.projectName)}
+                        helperText={validationErrors.projectName}
                         onBlur={handleValidation}
                       />
+
                       <FormControl fullWidth>
                         <InputLabel id="demo-simple-select-label">Project Type</InputLabel>
                         <Select
@@ -498,11 +493,12 @@ const ButtonCenter = () => {
                           value={projectType}
                           onChange={(e) => {
                             setProjectType(e.target.value);
-                            handleValidation(); // Trigger validation on change
+                            setValidationErrors((prevErrors) => ({ ...prevErrors, projectType: '' }));
+                            handleValidation();
                           }}
                           style={{ marginBottom: '16px' }}
-                          error={validationErrors.projectType}
-                          helperText={customErrorMessages.projectType}
+                          error={Boolean(validationErrors.projectType)}
+                          helperText={validationErrors.projectType}
                         >
                           <MenuItem value="frontend">Frontend</MenuItem>
                           <MenuItem value="backend">Backend</MenuItem>
@@ -522,8 +518,8 @@ const ButtonCenter = () => {
                             handleValidation(); // Trigger validation on change
                           }}
                           style={{ marginBottom: '16px' }}
-                          error={validationErrors.projectScope}
-                          helperText={customErrorMessages.projectScope}
+                          error={Boolean(validationErrors.projectScope)}
+                          helperText={validationErrors.projectScope}
                         >
                           <MenuItem value="external">External</MenuItem>
                           <MenuItem value="internal">Internal</MenuItem>
@@ -553,8 +549,8 @@ const ButtonCenter = () => {
                             </Box>
                           )}
                           MenuProps={MenuProps}
-                          error={validationErrors.techStack}
-                          helperText={customErrorMessages.techStack}
+                          error={Boolean(validationErrors.techStack)}
+                          helperText={validationErrors.techStack}
                         >
                           <MenuItem value="Java">Java</MenuItem>
                           <MenuItem value="JavaScript">JavaScript</MenuItem>
@@ -575,15 +571,15 @@ const ButtonCenter = () => {
                         label="Description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        style={{ marginTop: '16px', boxSizing: 'border-box', overflowY: 'auto', }}
-                        error={validationErrors.description}
-                        helperText={validationErrors.description && 'Description is required'}
+                        style={{ marginTop: '16px', boxSizing: 'border-box', overflowY: 'auto' }}
+                        error={Boolean(validationErrors.description)}
+                        helperText={validationErrors.description}
                         onBlur={handleValidation}
                       />
                     </Box>
                   </DialogContent>
                   <DialogActions style={{ marginBottom: '10px', marginRight: '30px' }}>
-                    <Button onClick={handleCloseAddProjectDialog} style={{ backgroundColor: '#00aaee', color: 'white' }}>
+                    <Button onClick={() => { }} style={{ backgroundColor: '#00aaee', color: 'white' }}>
                       <b>Cancel</b>
                     </Button>
                     <Button
@@ -596,10 +592,8 @@ const ButtonCenter = () => {
                     >
                       <b>Save</b>
                     </Button>
-
                   </DialogActions>
                 </Dialog>
-
                 <Button
                   style={{ backgroundColor: isHovering ? '#db764f' : '#d95623', marginLeft: '20px' }}
                   className="kpi-form"
@@ -717,7 +711,7 @@ const ButtonCenter = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseProfileCard} variant='contained' style={{backgroundColor:'#00aaee', marginRight:'10px', marginBottom:'10px'}}>
+          <Button onClick={handleCloseProfileCard} variant='contained' style={{ backgroundColor: '#00aaee', marginRight: '10px', marginBottom: '10px' }}>
             Close
           </Button>
         </DialogActions>
