@@ -388,7 +388,7 @@ export default function EmployeeReviews() {
                                             .map((data, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell style={{ fontSize: '14px' }}>{data.ReviewPoint}</TableCell>
-                                                    <TableCell style={{ textAlign: 'center', }}>
+                                                    <TableCell style={{ textAlign: 'center' }}>
                                                         {data.Self_Review == "1" ? (
                                                             <Button variant='outlined' className="yes-button">Yes</Button>
                                                         ) : (
@@ -422,7 +422,7 @@ export default function EmployeeReviews() {
                                 {projectDetails.map((project, index) => (
                                     <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
                                         <h2>{project.projectName}</h2>
-                                        <p><b>Type: </b>{project.ProjectType}</p>
+                                        <p><b>Type: </b>{project.projectType}</p>
                                         <p><b>Scope: </b>{project.projectScope}</p> 
                                         <p><b>TechStack: </b>{project.techStack.join(',')}</p>
                                         <p><b>Description: </b>{project.description}</p>

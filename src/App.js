@@ -11,6 +11,7 @@ import ManagerCommentsGet from './ManagerCommentsGet';
 import EmployeeMainView from './EmployeeMainView';
 import EmployeeGet from './EmployeeGet';
 import Preview from './Preview';
+import Main from './Main';
 function App() {
   return (
     <div className="App">
@@ -27,6 +28,7 @@ function App() {
         <Route path='/EmployeeMainView' element={< EmployeeMainView/>} />
         <Route path='/EmployeeGet/:Empid' element={< EmployeeGet/>} />
         <Route path='/Preview' element={< Preview/>} />
+        <Route path='/' element={< Main/>} />
       </Routes>
     </Router>
     </div>

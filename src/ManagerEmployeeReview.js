@@ -72,7 +72,7 @@ export default function EmployeePortal() {
     // }, []);
 
     //    console.log(projectDetails,"73");
-
+  
 
     const handleTabChange = (event, newValue) => {
         setSelectedTab(newValue);
@@ -205,7 +205,7 @@ export default function EmployeePortal() {
     };
 
     const tabLabels = [...new Set(employeeData.map((data) => data.Value))];
-
+   
 
     const { Empid } = useParams();
 
@@ -214,7 +214,8 @@ export default function EmployeePortal() {
         navigate('/loginForm');
     };
 
-    const handleBack = () => {
+    const handleBack = () =>
+    {
         setOpenDialog(false);
         navigate('/mview');
     }
@@ -327,12 +328,12 @@ export default function EmployeePortal() {
                     Value: item.Value,
                     ReviewPoint: item.ReviewPoint,
                     self_review: item.Self_Review === "1" ? true : false,
-                    imageUrl: item.imageUrl,
+                    Upload: item.imageUrl,
                     reviewver: item.reviewver,
                     Comments: item.Comments,
                 })),
             };
-            console.log(employeeData, "336")
+
             // Send the formatted data to the server using a POST request to update the database
             const apiUrl = `${BASE_URLCHECK}/api/emp_manager_checkreviewpoint_insrt`;
 
@@ -357,8 +358,8 @@ export default function EmployeePortal() {
 
     var userId = JSON.parse(localStorage.getItem('practices'));
 
-    var userData1 = userId[0].empid
-    // console.log(userData1,"352");
+    var userData1=userId[0].empid
+    console.log(userData1,"352");
     // const storedData = localStorage.getItem('practices');
     // const employeesWithPractices = JSON.parse(storedData);
     // const managerempid = employeesWithPractices[0].Empid;
@@ -367,7 +368,7 @@ export default function EmployeePortal() {
     const firstname = localStorage.getItem('firstname');
     const lastname = localStorage.getItem('lastname');
     const username = firstname + " " + lastname
-    // console.log(empId,"355");
+    console.log(empId,"355");
 
     return (
         <div>
@@ -461,7 +462,7 @@ export default function EmployeePortal() {
                 <ArrowBack />&nbsp; <span><b>Go Back</b></span>
             </ListItemIcon>
             <form onSubmit={handleSubmit}>
-                <div style={{ marginLeft: '30px' }}>
+                <div style={{ marginLeft:'30px'}}>
                     <Tabs value={selectedTab} onChange={handleTabChange}>
                         {tabLabels.map((label, index) => (
                             <Tab label={label} key={index} style={{ fontWeight: 'bold', fontSize: '18px' }} />
@@ -472,7 +473,7 @@ export default function EmployeePortal() {
                 <Grid container spacing={2}>
 
                     <Grid item xs={9}>
-                        <div style={{ backgroundColor: '#f5f5f5', marginLeft: '30px' }}>
+                        <div style={{  backgroundColor: '#f5f5f5', marginLeft:'30px' }}>
                             <div style={{ height: '500px', overflowY: 'auto' }}>
                                 <Table>
                                     <TableHead style={{ backgroundColor: '#d0e6f5' }}>
@@ -488,11 +489,11 @@ export default function EmployeePortal() {
                                         {tabData[selectedTab] && tabData[selectedTab].map((data, index) => (
                                             <TableRow key={index}>
                                                 <TableCell style={{ fontSize: '14px', }}>{data.ReviewPoint}</TableCell>
-                                                <TableCell style={{ fontSize: '14px', textAlign: 'center' }}>
+                                                <TableCell style={{ textAlign: 'center' }}>
                                                     {data.Self_Review == "1" ? (
-                                                       "Yes"
+                                                        <Button type="button" variant='outlined' className="yes-button">Yes</Button>
                                                     ) : (
-                                                        "No"
+                                                        <Button type="button" variant='outlined' className="no-button">No</Button>
                                                     )}
                                                 </TableCell>
                                                 <TableCell style={{ textAlign: 'center' }}>
@@ -503,22 +504,20 @@ export default function EmployeePortal() {
                                                         </>
                                                     )}
                                                 </TableCell>
-                                                <TableCell style={{ textAlign: 'center', width:'70px' }}>
+                                                <TableCell style={{ textAlign: 'center' }}>
                                                     <Select
                                                         className="reviewver-dropdown"
-                                                        style={{width:'100px'}}
                                                         value={data.reviewver}
                                                         onChange={(e) => handleReviewverChange(selectedTab, index, parseInt(e.target.value, 10))}
                                                         MenuProps={{
                                                             PaperProps: {
                                                                 style: {
-                                                                    maxHeight: 200,
-                                                                    
+                                                                    maxHeight: 200, // Set the maximum height for the dropdown
                                                                 },
                                                             },
                                                         }}
                                                     >
-
+                                                        
                                                         {[...Array(11).keys()].map((value) => (
                                                             <MenuItem key={value} value={value}>
                                                                 {value}
@@ -526,18 +525,14 @@ export default function EmployeePortal() {
                                                         ))}
                                                     </Select>
                                                 </TableCell>
-                                                
                                                 <TableCell style={{ textAlign: 'center' }}>
-                                                <Tooltip classes={{ tooltip: 'custom-tooltip' }}>
                                                     <TextField
                                                         multiline
-                                                        rows={1.5}
+                                                        rows={2}
                                                         value={data.Comments}
                                                         onChange={(e) => handleCommentChange(selectedTab, index, e.target.value)}
                                                     />
-                                                    </Tooltip>
                                                 </TableCell>
-                                                
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -686,7 +681,7 @@ export default function EmployeePortal() {
                         <Card style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#e9ecef' }}>
                             <Button style={{ textAlign: 'left', fontSize: '26px', justifyContent: 'end', color: 'black' }} onClick={handlePreviewModalClose}>X</Button>
                             <CardContent>
-                                <img src={previewImageUrl} alt="Preview" style={{ Width: '100%', Height: '100%' }} />
+                                <img src={previewImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
                             </CardContent>
                         </Card>
                     </div>
