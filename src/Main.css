@@ -1,4 +1,15 @@
-.card {
+.page-container {
+    background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPx8Om94xDmNJq2yNE4kQAyPRxm5Kjx4YKA3f2nydHLdVHKJ9V_-_Cqo30P3q1qaz7ZiE&usqp=CAU');
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  
+  }
+ 
+  .card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -14,12 +25,5 @@
   
   .button {
     margin: 0 10px;
-  
-  }
-  .card-container {
-        min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   
   }
