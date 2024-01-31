@@ -22,7 +22,7 @@ import Person3Icon from '@mui/icons-material/Person3';
 import PasswordIcon from '@mui/icons-material/Password';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { BASE_URL } from './config';
-  
+
 const RegistrationForm = () => {
     const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ const RegistrationForm = () => {
     const hr = ['Divya Abburi', 'Sruthi Kolli', 'Lohitha Bandi', 'Ajay Duvvu', 'PadmaPriya Kamsu', 'Vasu Varupula', 'Chandini Sigireddy'];
     const location = ['Miracle City', 'Miracle Heights', 'Miracle Valley', 'Novi USA'];
 
-    const [formData, setFormData] = useState({ 
+    const [formData, setFormData] = useState({
         Empid: '',
         Empmail: '',
         Firstname: '',
@@ -51,7 +51,7 @@ const RegistrationForm = () => {
 
     const validateEmpId = (empId) => {
         return empId.trim() !== '';
-      };
+    };
 
     const [openDialog, setOpenDialog] = useState(false);
     const [fileError, setFileError] = useState('');
@@ -61,44 +61,45 @@ const RegistrationForm = () => {
     };
     const [validationErrors, setValidationErrors] = useState({});
 
-    const handleChange = (event) => {
-        const { name, value, type, files } = event.target;
-        const newValue = type === 'file' ? files[0] : value;
-        
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+
         if (name === 'Empid' && value.trim() !== '' && !validateInteger(value)) {
             setValidationErrors((prevErrors) => ({
-              ...prevErrors,
-              [name]: 'Please enter integer values.',
+                ...prevErrors,
+                [name]: 'Please enter integer values.',
             }));
-          } else {
+        } else {
             setValidationErrors((prevErrors) => ({
-              ...prevErrors,
-              [name]: '',
+                ...prevErrors,
+                [name]: '',
             }));
-          }
+        }
+
         if (name === 'Empmail') {
             if (!/^[a-zA-Z][\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/.test(value)) {
-              setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: 'Please enter a valid email address. Ex: Abc@miraclesoft.com',
-              }));
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: 'Please enter a valid email address. Ex: abc@miraclesoft.com',
+                }));
             } else if (!value.endsWith('@miraclesoft.com')) {
-              setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: 'Email must end with @miraclesoft.com',
-              }));
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: 'Email must end with @miraclesoft.com',
+                }));
             } else if (value.split('@').length - 1 > 1) {
-              setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: "Only one '@' is allowed",
-              }));
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: "Only one '@' is allowed",
+                }));
             } else {
-              setValidationErrors((prevErrors) => ({
-                ...prevErrors,
-                [name]: '', // Clear the error when the format is correct
-              }));
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: '', // Clear the error when the format is correct
+                }));
             }
-          }
+        }
         if (name === 'Password') {
             if (value.length < 8) {
                 setValidationErrors((prevErrors) => ({
@@ -142,20 +143,35 @@ const RegistrationForm = () => {
             }
         }
 
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [name]: value,
-        }));
+        if (name === 'Image' && type === 'file') {
+            if (!value) {
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: 'Profile image is required',
+                }));
+            } else {
+                setValidationErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [name]: '',
+                }));
+            }
+        }
     };
 
-    const handleImageChange = (event) => {
-        const { name, files } = event.target;
-        const imageFile = files[0];
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            getBase64(file, (base64Image) => {
+                setFormData({ ...formData, Image: base64Image });
+            });
+        }
+    };
 
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [name]: imageFile,
-        }));
+    const getBase64 = (file, callback) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => callback(reader.result);
+        reader.onerror = (error) => console.error('Error converting file to base64:', error);
     };
 
     const handleClose = () => {
@@ -178,16 +194,9 @@ const RegistrationForm = () => {
         if (!validateEmpEmail(formData.Empmail)) {
             errors.Empmail = 'Please enter a valid Emp Email';
         }
-
-
-        // Add a validation check for the file upload
         if (!formData.Image) {
-            setFileError('Please select an image file');
-            return; // Return early to prevent further processing
-        } else {
-            setFileError(''); // Clear the file error if a file is selected
+            errors.Image = 'Profile image is required';
         }
-
 
 
         if (Object.keys(errors).length > 0) {
@@ -213,12 +222,9 @@ const RegistrationForm = () => {
                 Image: formData.Image,
             };
 
-            const formDataToSend = new FormData();
-            for (const key in displayPayload) {
-                formDataToSend.append(key, displayPayload[key]);
-            }
 
-            const response = await axios.post(`${BASE_URL}/api/emp_register`, formDataToSend);
+
+            const response = await axios.post(`${BASE_URL}/api/emp_register`, displayPayload);
 
             if (response.status === 200) {
                 console.log('Registration successful');
@@ -239,6 +245,7 @@ const RegistrationForm = () => {
             }
         } catch (error) {
             console.error(error);
+            
         }
     };
 
@@ -252,7 +259,7 @@ const RegistrationForm = () => {
         <div className="login-form">
             <fieldset style={{ backgroundColor: 'white' }}>
                 <center>
-                    <h2 style={{ textAlign:'center', textTransform:'uppercase' }}>Registration Form</h2>
+                    <h2 style={{ textAlign: 'center', textTransform: 'uppercase' }}>Registration Form</h2>
                 </center>
                 <form onSubmit={handleSubmit}>
                     <div className="form-row">
@@ -527,7 +534,7 @@ const RegistrationForm = () => {
                     </div>
                     <div style={{ marginBottom: '20px' }}></div>
                     <div>
-                    <p><b>Choose your Profile :</b></p>
+                        <p><b>Choose your Profile :</b></p>
                         <TextField
                             variant="outlined"
                             type="file"

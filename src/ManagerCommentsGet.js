@@ -182,7 +182,7 @@ export default function EmployeeReviews() {
 
 
     const handleClose = () => {
-        navigate('/mview');
+        navigate('/loginform');
     };
     useEffect(() => {
         const fetchData = async () => {

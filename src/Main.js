@@ -18,9 +18,12 @@ export default function Main() {
 
 
     return (
-        <div className="page-container" >
+        <>
+        <div className="page-container">
+       
+        <div  >
             <Container maxWidth="sm">
-                <Typography variant="h5" component="h5" gutterBottom style={{ color: 'black', textAlign: 'center' }}>
+                <Typography variant="h5" component="h5" gutterBottom style={{ color: 'white', textAlign: 'center' }}>
                     <b>WELCOME TO CODE REVIEW CHECK POINTS PORTAL!</b>
                 </Typography>
                 <Card className="card" style={{ minHeight: '400px', paddingTop: '20px',  }}>
@@ -38,6 +41,8 @@ export default function Main() {
                 </Card>
             </Container>
         </div>
+        </div>
+        </>
     );
 
 }

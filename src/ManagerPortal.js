@@ -171,7 +171,7 @@ const goBack = ()=>{
 
     const handleLogout = () => {
 
-        window.location.href = '/loginform';
+        navigate('/loginForm')
     };
 
     const firstname = localStorage.getItem('firstname');

@@ -17,10 +17,7 @@ import { BASE_URL } from './config';
 
 
 
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  window.location.href = '/loginform';
-};
+
 
 
 
@@ -60,6 +57,10 @@ const ButtonCenter = () => {
   const [description, setDescription] = useState('');
   const [customErrorMessages, setCustomErrorMessages] = useState('');
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+   navigate('/loginform')
+  };
 
   const handleMouseEnter = () => {
     setIsHovering(true);

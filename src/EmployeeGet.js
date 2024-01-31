@@ -420,12 +420,12 @@ export default function EmployeeReviews() {
                 <Card style={{marginRight:'20px', backgroundColor: '#f5f5f5'}}>
                             <CardContent>
                                 {projectDetails.map((project, index) => (
-                                    <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif'}}>
+                                    <div key={index} style={{fontSize:'16px', fontFamily:'sans-serif', }}>
                                         <h2>{project.projectName}</h2>
-                                        <p><b>Type: </b>{project.projectType}</p>
-                                        <p><b>Scope: </b>{project.projectScope}</p> 
-                                        <p><b>TechStack: </b>{project.techStack.join(',')}</p>
-                                        <p><b>Description: </b>{project.description}</p>
+                                        <p style={{textAlign:'left'}}><b>Type: </b>{project.ProjectType}</p>
+                                        <p style={{textAlign:'left'}}><b>Scope: </b>{project.projectScope}</p> 
+                                        <p style={{textAlign:'left'}}><b>TechStack: </b>{project.techStack.join(',')}</p>
+                                        <p style={{textAlign:'left'}}><b>Description: </b>{project.description}</p>
                                         {/* Add more fields as needed */}
                                     </div>
                                 ))}
