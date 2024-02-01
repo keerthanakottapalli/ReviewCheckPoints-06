@@ -33,8 +33,9 @@ const ManagerPortal = () => {
     const [showChangePassword, setShowChangePassword] = useState(false);
     const [showImagePreview, setShowImagePreview] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [noDataErrorMsg, setNoDataErrorMsg] = useState();
 
-
+console.log(noDataErrorMsg, "38");
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
     };
@@ -186,6 +187,13 @@ const goBack = ()=>{
             setLoading(false);
         });
     }, []);
+
+    setTimeout(() =>
+        {
+            setNoDataErrorMsg("No data available for the selected User.")
+           
+        },3000);
+    
     return (
         <>
             <AppBar position="fixed">
@@ -348,7 +356,7 @@ const goBack = ()=>{
                                         textAlign: 'center',
                                     }}
                                 >
-                                    No Employee Found Here.
+                                    <h1>{noDataErrorMsg}</h1>
                                 </Typography>
                             )}
                         </TableContainer>)}
